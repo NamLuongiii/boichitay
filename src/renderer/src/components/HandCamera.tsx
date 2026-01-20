@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import handLine from '../assets/hand_line.svg'
+import handGif from '../assets/hand-guide.gif'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function HandCamera() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [photo, setPhoto] = useState<string | null>(null)
+  const [showPaw, setShowPaw] = useState(true)
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -56,10 +58,14 @@ export function HandCamera() {
   return (
     <div>
       <Container>
+        {/*Camera */}
         <MaskedVideo ref={videoRef} autoPlay playsInline className="masked-video" />
 
         {/*display hand line */}
         <HandLine src={handLine} alt="hand line" />
+
+        {/*display video when hand not detected */}
+        {showPaw && <HandLine src={handGif} alt="hand gif" onClick={() => setShowPaw(false)} />}
       </Container>
 
       <canvas ref={canvasRef} style={{ display: 'none' }} />
@@ -97,11 +103,6 @@ export function HandCamera() {
 
 const Container = styled.div`
   position: relative;
-`
-
-const MaskedVideo = styled.video`
-  position: relative;
-
   min-width: 400px;
   min-height: 400px;
 
@@ -110,6 +111,12 @@ const MaskedVideo = styled.video`
 
   width: 60vw;
   height: 60vw;
+`
+
+const MaskedVideo = styled.video`
+  position: relative;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 `
 

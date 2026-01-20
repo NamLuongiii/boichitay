@@ -2,6 +2,7 @@ import React from 'react'
 import logo from '../assets/logo.svg'
 import styled from 'styled-components'
 import { HandCamera } from '@renderer/components/HandCamera'
+import { motion } from 'motion/react'
 
 type Props = {
   onSubmit(): void
@@ -23,19 +24,6 @@ const Logo = styled.img`
   left: 1rem;
 `
 
-export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
-  return (
-    <Container>
-      {/*Logo */}
-      <Logo src={logo} alt="logo" />
-      <HandCamera />
-      <StyledButton type="button" onClick={onSubmit}>
-        Hand not detected. Please face your palm toward the camera.
-      </StyledButton>
-    </Container>
-  )
-}
-
 const StyledButton = styled.button`
   font-weight: bold;
   font-size: var(--text-lg);
@@ -44,4 +32,25 @@ const StyledButton = styled.button`
   color: var(--button-text-color);
   box-shadow: 0px 2px 100px 0px rgba(240, 209, 53, 1);
   border-radius: 4rem;
+  max-width: 80vw;
 `
+
+const BtnMotion = motion(StyledButton)
+
+export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
+  return (
+    <Container>
+      {/*Logo */}
+      <Logo src={logo} alt="logo" />
+      <HandCamera />
+      <BtnMotion
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        type="button"
+        onClick={onSubmit}
+      >
+        Hand not detected. Please face your palm toward the camera.
+      </BtnMotion>
+    </Container>
+  )
+}

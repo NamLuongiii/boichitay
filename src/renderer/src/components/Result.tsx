@@ -1,4 +1,6 @@
 import React from 'react'
+import logo from '../assets/vertical_logo.svg'
+import styled from 'styled-components'
 
 type Props = {
   tryAgain(): void
@@ -6,11 +8,20 @@ type Props = {
 
 export const Result = ({ tryAgain }: Props): React.JSX.Element => {
   return (
-    <div>
-      Result
+    <Container>
+      <img src={logo} alt="logo" />
+      <h1>Assessment results</h1>
       <button type="button" onClick={tryAgain}>
         try again
       </button>
-    </div>
+    </Container>
   )
 }
+
+const Container = styled.div`
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+`

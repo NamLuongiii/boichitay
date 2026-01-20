@@ -46,5 +46,6 @@ const Answers = styled.div`
   p {
     border: 2px solid var(--yellow-color);
     padding: 1rem;
+    font-weight: bold;
   }
 `

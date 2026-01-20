@@ -11,7 +11,9 @@
 
   /*size */
   --text-normal: 16px;
-  --text-lg: 24px
+  --text-lg: 24px;
+
+  --footer-gradient: linear-gradient(180deg, rgba(22, 20, 63, 1) 0%, rgba(22, 20, 63, 0.8) 100%);
 }
 
 
@@ -53,7 +55,6 @@ body {
   background-position: center;
 
   font-size: var(--text-normal);
-  padding: 0 1rem;
 }
 
 .masked-video {

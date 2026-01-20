@@ -1,8 +1,8 @@
 import React from 'react'
 import logo from '../assets/logo.svg'
 import styled from 'styled-components'
-import { HandCamera } from '@renderer/components/HandCamera'
 import { motion } from 'motion/react'
+import { HandDetection } from '@renderer/AI/HandDetection'
 
 type Props = {
   onSubmit(): void
@@ -42,7 +42,8 @@ export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
     <Container>
       {/*Logo */}
       <Logo src={logo} alt="logo" />
-      <HandCamera />
+      {/*<HandCamera />*/}
+      <HandDetection />
       <BtnMotion
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}

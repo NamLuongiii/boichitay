@@ -24,7 +24,7 @@ function App(): React.JSX.Element {
   const onSubmit = (picture: string): void => {
     setShowLoading(true)
 
-    const showDemo = true
+    const showDemo = false
 
     if (showDemo) {
       // await 3s
@@ -51,7 +51,11 @@ function App(): React.JSX.Element {
           setShowResult(true)
           setShowLoading(false)
         })
-        .catch(console.error)
+        .catch((err) => {
+          console.error(err)
+          setShowLoading(false)
+          alert(err.message)
+        })
   }
 
   return (

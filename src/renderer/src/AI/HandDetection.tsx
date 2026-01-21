@@ -178,10 +178,10 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
     const imageData = canvas.toDataURL('image/png')
     setPicture(imageData)
 
-    // wait for 5s for user preview picture
+    // wait for 3s for user preview picture
     setTimeout(() => {
       onSubmit(imageData)
-    }, 5000)
+    }, 3000)
 
     console.log('📸 Picture taken')
   }

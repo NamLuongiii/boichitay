@@ -38,6 +38,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
   const stopPredict = useRef(false)
   const [showLoading, setShowLoading] = useState(false)
   const [picture, setPicture] = useState<string | null>(null)
+  const frameCountRef = useRef(3) // frame count for prediction, first frame is for initialization
 
   useEffect(() => {
     async function setupGestureRecognizer(): Promise<void> {
@@ -72,67 +73,71 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
     async function predictGesture(): Promise<void> {
       if (!videoRef.current || !gestureRef.current || stopPredict.current) return
 
-      // mediapipe prediction
-      const result = gestureRef.current.recognizeForVideo(videoRef.current, performance.now())
+      // Only run prediction each 3 frame
+      if (frameCountRef.current % 3 === 0) {
+        // mediapipe prediction
+        const result = gestureRef.current.recognizeForVideo(videoRef.current, performance.now())
 
-      // handle result prediction
-      const landmarks = result.landmarks[0]
-      if (landmarks) console.log(result)
-      if (landmarks) {
-        const gesture = result.gestures[0]?.[0]?.categoryName
-        // check left hand only
-        const isLeftHand = result.handedness[0][0].categoryName === 'Left'
+        // handle result prediction
+        const landmarks = result.landmarks[0]
+        if (landmarks) console.log(result)
+        if (landmarks) {
+          const gesture = result.gestures[0]?.[0]?.categoryName
+          // check left hand only
+          const isLeftHand = result.handedness[0][0].categoryName === 'Left'
 
-        if (!isLeftHand) {
-          setMessage(Messages.ONLY_LEFT_HAND_ALLOWED)
-          if (taskId.current) {
-            clearTimeout(taskId.current)
-            taskId.current = undefined
-          }
-        } else if (gesture !== GESTURES.OPEN_PALM) {
-          setMessage(Messages.HAND_NEED_OPEN_PALM)
-          // clear task id if hand not correct position
-          if (taskId.current) {
-            clearTimeout(taskId.current)
-            taskId.current = undefined
-          }
-        } else if (!isPalmParallelToCamera(landmarks)) {
-          setMessage(Messages.HAND_NEED_PARALLEL)
-          // clear task id if hand not correct position
-          if (taskId.current) {
-            clearTimeout(taskId.current)
-            taskId.current = undefined
-          }
-        } else if (!isPalmFacingCamera(landmarks)) {
-          setMessage(Messages.HAND_NEED_FACING)
-          // clear task id if hand not correct position
-          if (taskId.current) {
-            clearTimeout(taskId.current)
-            taskId.current = undefined
-          }
-        } else if (!isPalmCloseToCamera(landmarks)) {
-          setMessage(Messages.HAND_NEED_CLOSER)
-          // clear task id if hand not correct position
-          if (taskId.current) {
-            clearTimeout(taskId.current)
-            taskId.current = undefined
+          if (!isLeftHand) {
+            setMessage(Messages.ONLY_LEFT_HAND_ALLOWED)
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else if (gesture !== GESTURES.OPEN_PALM) {
+            setMessage(Messages.HAND_NEED_OPEN_PALM)
+            // clear task id if hand not correct position
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else if (!isPalmParallelToCamera(landmarks)) {
+            setMessage(Messages.HAND_NEED_PARALLEL)
+            // clear task id if hand not correct position
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else if (!isPalmFacingCamera(landmarks)) {
+            setMessage(Messages.HAND_NEED_FACING)
+            // clear task id if hand not correct position
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else if (!isPalmCloseToCamera(landmarks)) {
+            setMessage(Messages.HAND_NEED_CLOSER)
+            // clear task id if hand not correct position
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else {
+            setMessage(Messages.KEEP_HAND_STILL)
+            setShowPaw(false)
+
+            // hand in the correct position, start timer to close hand
+            if (!taskId.current) {
+              taskId.current = setTimeout(() => {
+                takePicture()
+                stopPredict.current = true
+              }, 3000)
+            }
           }
         } else {
-          setMessage(Messages.KEEP_HAND_STILL)
-          setShowPaw(false)
-
-          // hand in the correct position, start timer to close hand
-          if (!taskId.current) {
-            taskId.current = setTimeout(() => {
-              takePicture()
-              stopPredict.current = true
-            }, 3000)
-          }
+          setMessage(Messages.NO_HAND_DETECTED)
+          setShowPaw(true)
         }
-      } else {
-        setMessage(Messages.NO_HAND_DETECTED)
-        setShowPaw(true)
       }
+      frameCountRef.current++
 
       // Keep predict in the next frame
       requestRef.current = requestAnimationFrame(predictGesture)

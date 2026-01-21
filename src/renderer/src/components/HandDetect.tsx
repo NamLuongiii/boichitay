@@ -68,6 +68,8 @@ const StyledButton = styled.button`
   border-radius: 4rem;
   max-width: 80vw;
   font-size: var(--text-lg);
+  outline: none;
+  border: none;
 `
 
 const BtnMotion = motion(StyledButton)
@@ -96,7 +98,7 @@ const MessageCountdown = (): JSX.Element => {
         mass: 0.9
       }}
       type="button"
-      style={{ backgroundColor: 'var(--green-color)' }}
+      style={{ backgroundColor: 'var(--green-color)', boxShadow: 'none' }}
     >
       Hold the position for {seconds} seconds
     </BtnMotion>

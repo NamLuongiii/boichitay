@@ -2,30 +2,68 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Result } from '@renderer/components/Result'
 import { HandDetect } from '@renderer/components/HandDetect'
+import { Loading } from '@renderer/components/Loading'
+import { analyzePalmFromCanvas } from '@renderer/AI/gemini'
 // import { Stars } from '@renderer/components/Stars'
 
 const StyledApp = styled.div`
   position: relative;
 `
 
+export type TResult = {
+  title: string
+  content: string
+}
+
 function App(): React.JSX.Element {
   const [showResult, setShowResult] = useState(false)
   const [pictureUrl, setPictureUrl] = useState<string>()
+  const [showLoading, setShowLoading] = useState(false)
+  const [result, setResult] = useState<TResult[]>([])
+
+  const onSubmit = (picture: string): void => {
+    setShowLoading(true)
+
+    const showDemo = true
+
+    if (showDemo) {
+      // await 3s
+      setTimeout(() => {
+        setResult([
+          {
+            title: 'test',
+            content: 'test'
+          }
+        ])
+
+        setPictureUrl(picture)
+        setShowResult(true)
+        setShowLoading(false)
+      }, 3000)
+    } else
+      analyzePalmFromCanvas(picture)
+        .then((result) => {
+          // parse result to json
+          const parsedResult = JSON.parse(result) as TResult[]
+          setResult(parsedResult)
+
+          setPictureUrl(picture)
+          setShowResult(true)
+          setShowLoading(false)
+        })
+        .catch(console.error)
+  }
+
   return (
     <StyledApp>
       {showResult && pictureUrl ? (
-        <Result tryAgain={() => setShowResult(false)} pictureUrl={pictureUrl} />
+        <Result tryAgain={() => setShowResult(false)} pictureUrl={pictureUrl} result={result} />
       ) : (
-        <HandDetect
-          onSubmit={(picture) => {
-            console.log(picture)
-            setPictureUrl(picture)
-            setShowResult(true)
-          }}
-        />
+        <HandDetect onSubmit={onSubmit} />
       )}
 
       {/*<Stars />*/}
+      {showLoading && <Loading />}
     </StyledApp>
   )
 }

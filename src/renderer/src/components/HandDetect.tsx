@@ -6,6 +6,7 @@ import { HandDetection, Messages } from '@renderer/AI/HandDetection'
 type Props = {
   onSubmit(picture: string): void
 }
+const handDirection = import.meta.env.VITE_HAND_DIRECTION
 
 const Container = styled.div`
   position: relative;
@@ -36,7 +37,11 @@ export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
       {/*Logo */}
       <Logo src={logo} alt="logo" />
 
-      <HandDetection setMessage={setMessage} onSubmit={onSubmit} />
+      <HandDetection
+        setMessage={setMessage}
+        onSubmit={onSubmit}
+        handDirection={(handDirection as 'left' | 'right') || 'left'}
+      />
 
       <Bottom>
         {message === Messages.KEEP_HAND_STILL ? (
@@ -76,11 +81,13 @@ const BtnMotion = motion(StyledButton)
 
 const MessageCountdown = (): JSX.Element => {
   const [seconds, setSeconds] = useState(3)
+  const [msg, setMsg] = useState<string>()
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (seconds === 0) {
+      if (seconds === 1) {
         clearInterval(timer)
+        setMsg('Take a picture')
         return
       }
       setSeconds(seconds - 1)
@@ -100,7 +107,7 @@ const MessageCountdown = (): JSX.Element => {
       type="button"
       style={{ backgroundColor: 'var(--green-color)', boxShadow: 'none' }}
     >
-      Hold the position for {seconds} seconds
+      {msg ? msg : `Hold the position for ${seconds} seconds`}
     </BtnMotion>
   )
 }

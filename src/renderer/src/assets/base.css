@@ -40,6 +40,27 @@ ul {
   list-style: none;
 }
 
+/* Hide scrollbar but still allow scrolling */
+
+/* Chrome, Edge, Safari */
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Firefox */
+
+* {
+  scrollbar-width: none;
+}
+
+/* IE / Edge legacy */
+
+* {
+  -ms-overflow-style: none;
+}
+
 body {
   min-height: 100vh;
   color: var(--text-color);
@@ -73,7 +94,6 @@ body {
   center;
 
   font-size: var(--text-normal);
-
 }
 
 
@@ -92,7 +112,6 @@ body {
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
 }
-
 
 
 

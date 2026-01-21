@@ -4,13 +4,13 @@ import gestureRecognizerModel from './gesture_recognizer.task?url'
 import styled from 'styled-components'
 import handLine from '@renderer/assets/hand/hand_line.svg'
 import { isPalmCloseToCamera, isPalmFacingCamera, isPalmParallelToCamera } from '@renderer/AI/fns'
-import { Loading } from '@renderer/components/Loading'
 import handGif from '@renderer/assets/hand/hand-guide.gif'
 // import SubtractHand from '../assets/hand/Subtract.svg'
 
 type Props = {
   setMessage(msg: Messages): void
   onSubmit(picture: string): void
+  handDirection?: 'left' | 'right'
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -21,14 +21,15 @@ export enum Messages {
   HAND_NEED_CLOSER = 'Hand needs to be closer to camera.',
   KEEP_HAND_STILL = 'Hold the position for 3 seconds',
   HAND_NEED_OPEN_PALM = 'Hand needs to be open.',
-  ONLY_LEFT_HAND_ALLOWED = 'Only left hand is allowed.'
+  ONLY_LEFT_HAND_ALLOWED = 'Only left hand is allowed.',
+  ONLY_RIGHT_HAND_ALLOWED = 'Only right hand is allowed.'
 }
 
 enum GESTURES {
   OPEN_PALM = 'Open_Palm'
 }
 
-export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
+export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): JSX.Element => {
   const landmarkerRef = useRef<HandLandmarker | null>(null)
   const gestureRef = useRef<GestureRecognizer>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -36,9 +37,8 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
   const [showPaw, setShowPaw] = useState(true)
   const taskId = useRef<NodeJS.Timeout>(undefined)
   const stopPredict = useRef(false)
-  const [showLoading, setShowLoading] = useState(false)
   const [picture, setPicture] = useState<string | null>(null)
-  const frameCountRef = useRef(3) // frame count for prediction, first frame is for initialization
+  const frameCountRef = useRef(3) // frame count for prediction, the first frame is for initialization
 
   useEffect(() => {
     async function setupGestureRecognizer(): Promise<void> {
@@ -83,11 +83,18 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
         if (landmarks) console.log(result)
         if (landmarks) {
           const gesture = result.gestures[0]?.[0]?.categoryName
-          // check left hand only
+          // check hand direction by config
           const isLeftHand = result.handedness[0][0].categoryName === 'Left'
+          const isRightHand = result.handedness[0][0].categoryName === 'Right'
 
-          if (!isLeftHand) {
+          if (!isLeftHand && handDirection === 'left') {
             setMessage(Messages.ONLY_LEFT_HAND_ALLOWED)
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else if (!isRightHand && handDirection === 'right') {
+            setMessage(Messages.ONLY_RIGHT_HAND_ALLOWED)
             if (taskId.current) {
               clearTimeout(taskId.current)
               taskId.current = undefined
@@ -171,12 +178,10 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
     const imageData = canvas.toDataURL('image/png')
     setPicture(imageData)
 
-    // wait for second 3
-    setShowLoading(true)
+    // wait for 5s for user preview picture
     setTimeout(() => {
       onSubmit(imageData)
-      setShowLoading(false)
-    }, 3000)
+    }, 5000)
 
     console.log('📸 Picture taken')
   }
@@ -189,7 +194,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           ref={videoRef}
           autoPlay
           playsInline
-          className="masked-video"
+          className={'masked-video'}
           width={600}
           height={600}
           style={picture ? { display: 'none' } : {}}
@@ -197,7 +202,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
 
         {picture && (
           <img
-            className="masked-video"
+            className={'masked-video'}
             src={picture}
             alt="camera picture"
             width={600}
@@ -213,8 +218,6 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
         {/*display video when hand not detected */}
         {showPaw && <HandLine src={handGif} alt="hand gif" onClick={() => setShowPaw(false)} />}
       </CameraContainer>
-
-      {showLoading && <Loading />}
     </FlexContainer>
   )
 }

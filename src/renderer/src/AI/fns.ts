@@ -58,5 +58,9 @@ export function isPalmFacingCamera(landmarks: NormalizedLandmark[]): boolean {
   }
 
   const normalZ = v1.x * v2.y - v1.y * v2.x
-  return normalZ > 0
+
+  // check base on a hand direction
+  const handDirection = import.meta.env.VITE_HAND_DIRECTION
+
+  return handDirection === 'right' ? normalZ < 0 : normalZ > 0
 }

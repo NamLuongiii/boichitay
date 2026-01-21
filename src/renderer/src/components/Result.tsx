@@ -2,13 +2,15 @@ import React from 'react'
 import logo from '../assets/vertical_logo.svg'
 import styled from 'styled-components'
 import { motion } from 'motion/react'
+import { TResult } from '@renderer/App'
 
 type Props = {
   tryAgain(): void
   pictureUrl: string
+  result: TResult[]
 }
 
-export const Result = ({ tryAgain, pictureUrl }: Props): React.JSX.Element => {
+export const Result = ({ tryAgain, pictureUrl, result }: Props): React.JSX.Element => {
   return (
     <Container>
       <img src={logo} alt="logo" />
@@ -24,23 +26,23 @@ export const Result = ({ tryAgain, pictureUrl }: Props): React.JSX.Element => {
             ease: 'easeOut'
           }}
         >
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{
-              delay: 0.1,
-              type: 'spring',
-              stiffness: 220,
-              damping: 20,
-              mass: 0.9
-            }}
-          >
-            <h3>Life Line</h3>
-            <p>
-              The life line appears clear with a gentle curve, interpreted as a sign of steady
-              energy, resilient vitality, and an ability to adapt well to change.
-            </p>
-          </motion.div>
+          {result.map((r, i) => (
+            <motion.div
+              key={i}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{
+                delay: 0.1,
+                type: 'spring',
+                stiffness: 220,
+                damping: 20,
+                mass: 0.9
+              }}
+            >
+              <h3>{r.title}</h3>
+              <p>{r.content}</p>
+            </motion.div>
+          ))}
         </Answers>
         <MotionImage
           src={pictureUrl}
@@ -51,7 +53,6 @@ export const Result = ({ tryAgain, pictureUrl }: Props): React.JSX.Element => {
             duration: 0.4,
             ease: 'easeOut'
           }}
-          style={{ width: '30%' }}
         />
       </Content>
       <button type="button" onClick={tryAgain}>
@@ -73,10 +74,15 @@ const Content = styled.div`
   display: flex;
   width: 100%;
   gap: 2rem;
-  flex-basis: 70%;
+  flex-basis: 60%;
+  align-items: start;
 `
 const Answers = styled.div`
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
   & > div {
     border: 2px solid var(--yellow-color);
     padding: 1rem;
@@ -86,6 +92,6 @@ const Answers = styled.div`
 
 const Image = styled.img`
   border-radius: 1rem;
-  width: 30%;
+  width: 40%;
 `
 const MotionImage = motion(Image)

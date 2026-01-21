@@ -31,7 +31,7 @@ Yêu cầu:
 - Đoạn đầu tiên luôn là [Mô tả tay]
 
 Bắt buộc:
-[Mô tả tay]: đoán giới tính nam/nữ, liệt kê các đường chỉ tay chính và đặc điểm hình dạng bàn tay
+[Mô tả tay]: liệt kê các đường chỉ tay chính và đặc điểm hình dạng bàn tay, các vết sần sùi ...
 
 YÊU CẦU BẮT BUỘC:
 - Chỉ trả về JSON hợp lệ

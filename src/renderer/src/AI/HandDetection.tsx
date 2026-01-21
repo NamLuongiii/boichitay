@@ -3,7 +3,12 @@ import { FilesetResolver, GestureRecognizer, HandLandmarker } from '@mediapipe/t
 import gestureRecognizerModel from './gesture_recognizer.task?url'
 import styled from 'styled-components'
 import handLine from '@renderer/assets/hand/hand_line.svg'
-import { isPalmCloseToCamera, isPalmFacingCamera, isPalmParallelToCamera } from '@renderer/AI/fns'
+import {
+  estimateHandDepthByArea,
+  isHandCentered,
+  isPalmFacingCamera,
+  isPalmParallelToCamera
+} from '@renderer/AI/fns'
 import handGif from '@renderer/assets/hand/hand-guide.gif'
 // import SubtractHand from '../assets/hand/Subtract.svg'
 
@@ -19,10 +24,12 @@ export enum Messages {
   HAND_NEED_PARALLEL = 'Hand needs to be parallel to camera.',
   HAND_NEED_FACING = 'Hand needs to be facing camera.',
   HAND_NEED_CLOSER = 'Hand needs to be closer to camera.',
+  HAND_NEED_DEEP = 'Hand needs to be deeper in the camera.',
   KEEP_HAND_STILL = 'Hold the position for 3 seconds',
   HAND_NEED_OPEN_PALM = 'Hand needs to be open.',
   ONLY_LEFT_HAND_ALLOWED = 'Only left hand is allowed.',
-  ONLY_RIGHT_HAND_ALLOWED = 'Only right hand is allowed.'
+  ONLY_RIGHT_HAND_ALLOWED = 'Only right hand is allowed.',
+  HAND_NEED_CENTER = 'Hand needs to be in the center of the camera.'
 }
 
 enum GESTURES {
@@ -80,12 +87,15 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
 
         // handle result prediction
         const landmarks = result.landmarks[0]
-        if (landmarks) console.log(result)
         if (landmarks) {
+          // Hand detected
+          setShowPaw(false)
+
           const gesture = result.gestures[0]?.[0]?.categoryName
           // check hand direction by config
           const isLeftHand = result.handedness[0][0].categoryName === 'Left'
           const isRightHand = result.handedness[0][0].categoryName === 'Right'
+          const deepEstimation = estimateHandDepthByArea(landmarks, 0.7)
 
           if (!isLeftHand && handDirection === 'left') {
             setMessage(Messages.ONLY_LEFT_HAND_ALLOWED)
@@ -120,8 +130,22 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
               clearTimeout(taskId.current)
               taskId.current = undefined
             }
-          } else if (!isPalmCloseToCamera(landmarks)) {
+          } else if (!isHandCentered(landmarks)) {
+            setMessage(Messages.HAND_NEED_CENTER)
+            // clear task id if hand not correct position
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else if (!deepEstimation.isInRange && deepEstimation.diffPercent < 0) {
             setMessage(Messages.HAND_NEED_CLOSER)
+            // clear task id if hand not correct position
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
+            }
+          } else if (!deepEstimation.isInRange && deepEstimation.diffPercent > 0) {
+            setMessage(Messages.HAND_NEED_DEEP)
             // clear task id if hand not correct position
             if (taskId.current) {
               clearTimeout(taskId.current)
@@ -129,7 +153,6 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
             }
           } else {
             setMessage(Messages.KEEP_HAND_STILL)
-            setShowPaw(false)
 
             // hand in the correct position, start timer to close hand
             if (!taskId.current) {
@@ -178,10 +201,10 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
     const imageData = canvas.toDataURL('image/png')
     setPicture(imageData)
 
-    // wait for 3s for user preview picture
+    // wait for 1.5s for user preview picture
     setTimeout(() => {
       onSubmit(imageData)
-    }, 3000)
+    }, 1500)
 
     console.log('📸 Picture taken')
   }

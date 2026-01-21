@@ -24,7 +24,7 @@ function App(): React.JSX.Element {
   const onSubmit = (picture: string): void => {
     setShowLoading(true)
 
-    const showDemo = false
+    const showDemo = true
 
     if (showDemo) {
       // await 3s
@@ -39,7 +39,7 @@ function App(): React.JSX.Element {
         setPictureUrl(picture)
         setShowResult(true)
         setShowLoading(false)
-      }, 3000)
+      }, 500)
     } else
       analyzePalmFromCanvas(picture)
         .then((result) => {

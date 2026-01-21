@@ -10,8 +10,21 @@
   --card-border-color: rgba(225, 176, 97, 1);
 
   /*size */
-  --text-normal: 16px;
-  --text-lg: 24px
+  --text-normal: 24px;
+  --text-lg: 32px;
+  --text-sm: 16px;
+
+  --footer-gradient: linear-gradient(180deg, transparent 0%, rgba(39, 6, 96, .5) 50%, rgba(39, 6, 96, 1) 100%);
+
+  --bg-galaxy: url("background/star-galaxy.svg");
+}
+
+@media screen and (max-width: 1024px) {
+  :root {
+    --text-normal: 14px;
+    --text-lg: 16px;
+    --text-sm: 12px;
+  }
 }
 
 
@@ -48,18 +61,26 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-image: url('background-shape.svg'), url("background.svg");
-  background-size: cover;
-  background-position: center;
+  background-image: url("background/background-shape.svg"), url("background/background.svg");
+
+  background-size: cover,
+  cover;
+
+  background-repeat: no-repeat,
+  no-repeat;
+
+  background-position: center,
+  center;
 
   font-size: var(--text-normal);
-  padding: 0 1rem;
+
 }
+
 
 .masked-video {
   display: inline-block;
 
-  -webkit-mask-image: url('./hand.svg');
+  -webkit-mask-image: url('hand/hand.svg');
 
 
   -webkit-mask-repeat: no-repeat;
@@ -71,7 +92,6 @@ body {
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
 }
-
 
 
 

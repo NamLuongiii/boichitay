@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import handLine from '../assets/hand_line.svg'
-import handGif from '../assets/hand-guide.gif'
+import handLine from '../assets/hand/hand_line.svg'
+import handGif from '../assets/hand/hand-guide.gif'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function HandCamera() {

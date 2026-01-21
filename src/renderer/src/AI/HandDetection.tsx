@@ -1,50 +1,50 @@
 import { JSX, useEffect, useRef, useState } from 'react'
 import { FilesetResolver, GestureRecognizer, HandLandmarker } from '@mediapipe/tasks-vision'
-import handLandmarkerModel from './hand_landmarker.task?url'
-import grestureRecognizerModel from './gesture_recognizer.task?url'
+import gestureRecognizerModel from './gesture_recognizer.task?url'
 import styled from 'styled-components'
-import handLine from '@renderer/assets/hand_line.svg'
-import handGif from '@renderer/assets/hand-guide.gif'
-import { motion } from 'motion/react'
+import handLine from '@renderer/assets/hand/hand_line.svg'
 import { isPalmCloseToCamera, isPalmFacingCamera, isPalmParallelToCamera } from '@renderer/AI/fns'
+import { Loading } from '@renderer/components/Loading'
+import handGif from '@renderer/assets/hand/hand-guide.gif'
+// import SubtractHand from '../assets/hand/Subtract.svg'
 
 type Props = {
-  onClosen: () => void
+  setMessage(msg: Messages): void
+  onSubmit(picture: string): void
 }
 
-enum Messages {
-  NO_HAND_DETECTED = 'No hand detected.',
-  HAND_DETECTED = 'Hand detected!',
+// eslint-disable-next-line react-refresh/only-export-components
+export enum Messages {
+  NO_HAND_DETECTED = 'Hand not detected. Please face your palm toward the camera.',
   HAND_NEED_PARALLEL = 'Hand needs to be parallel to camera.',
   HAND_NEED_FACING = 'Hand needs to be facing camera.',
   HAND_NEED_CLOSER = 'Hand needs to be closer to camera.',
-  KEEP_HAND_STILL = 'Keep your hand still for 3 seconds',
-  HAND_NEED_OPEN_PALM = 'Hand needs to be open.'
+  KEEP_HAND_STILL = 'Hold the position for 3 seconds',
+  HAND_NEED_OPEN_PALM = 'Hand needs to be open.',
+  ONLY_LEFT_HAND_ALLOWED = 'Only left hand is allowed.'
 }
 
-export const HandDetection = ({ onClosen }: Props): JSX.Element => {
+enum GESTURES {
+  OPEN_PALM = 'Open_Palm'
+}
+
+export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
   const landmarkerRef = useRef<HandLandmarker | null>(null)
   const gestureRef = useRef<GestureRecognizer>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const requestRef = useRef<number | null>(null)
   const [showPaw, setShowPaw] = useState(true)
-  const [message, setMessage] = useState<string>(Messages.NO_HAND_DETECTED)
+  const taskId = useRef<NodeJS.Timeout>(undefined)
+  const stopPredict = useRef(false)
+  const [showLoading, setShowLoading] = useState(false)
+  const [picture, setPicture] = useState<string | null>(null)
 
   useEffect(() => {
-    async function setupHandLandmarker(): Promise<void> {
-      const vision = await FilesetResolver.forVisionTasks('./wasm')
-      landmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: handLandmarkerModel, delegate: 'GPU' },
-        runningMode: 'VIDEO', // Sang chế độ VIDEO
-        numHands: 1
-      })
-    }
-
-    async function setupGestureRecoginzer() {
+    async function setupGestureRecognizer(): Promise<void> {
       const vision = await FilesetResolver.forVisionTasks('./wasm')
       gestureRef.current = await GestureRecognizer.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: grestureRecognizerModel,
+          modelAssetPath: gestureRecognizerModel,
           delegate: 'GPU'
         },
         runningMode: 'VIDEO',
@@ -65,77 +65,120 @@ export const HandDetection = ({ onClosen }: Props): JSX.Element => {
         // Start mediapipe when camera ready
         videoRef.current?.play()
 
-        setTimeout(() => predictGresture(), 1000)
+        setTimeout(() => predictGesture(), 1000)
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const predictWebcam = (): void => {
-      console.log('Predicting...')
-      if (!videoRef.current || !landmarkerRef.current) return
+    async function predictGesture(): Promise<void> {
+      if (!videoRef.current || !gestureRef.current || stopPredict.current) return
 
-      const startTimeMs = performance.now()
-      const results = landmarkerRef.current.detectForVideo(videoRef.current, startTimeMs)
-
-      if (results.landmarks.length > 0) {
-        console.log('Hand detected! 🖐️', results.landmarks)
-        setShowPaw(false)
-        setMessage(Messages.HAND_DETECTED)
-        // Tại đây bạn có thể vẽ landmarks lên canvas nếu muốn
-      } else {
-        console.log('No hand detected.')
-        setShowPaw(true)
-        setMessage(Messages.NO_HAND_DETECTED)
-      }
-
-      setTimeout(() => {
-        requestRef.current = requestAnimationFrame(predictWebcam)
-      }, 500)
-    }
-
-    async function predictGresture(): Promise<void> {
-      console.log('Predicting...')
-      if (!videoRef.current || !gestureRef.current) return
-
+      // mediapipe prediction
       const result = gestureRef.current.recognizeForVideo(videoRef.current, performance.now())
-      console.log('Gesture result:', result)
 
+      // handle result prediction
       const landmarks = result.landmarks[0]
+      if (landmarks) console.log(result)
       if (landmarks) {
         const gesture = result.gestures[0]?.[0]?.categoryName
-        if (gesture !== 'Open_Palm') {
+        // check left hand only
+        const isLeftHand = result.handedness[0][0].categoryName === 'Left'
+
+        if (!isLeftHand) {
+          setMessage(Messages.ONLY_LEFT_HAND_ALLOWED)
+          if (taskId.current) {
+            clearTimeout(taskId.current)
+            taskId.current = undefined
+          }
+        } else if (gesture !== GESTURES.OPEN_PALM) {
           setMessage(Messages.HAND_NEED_OPEN_PALM)
+          // clear task id if hand not correct position
+          if (taskId.current) {
+            clearTimeout(taskId.current)
+            taskId.current = undefined
+          }
         } else if (!isPalmParallelToCamera(landmarks)) {
           setMessage(Messages.HAND_NEED_PARALLEL)
+          // clear task id if hand not correct position
+          if (taskId.current) {
+            clearTimeout(taskId.current)
+            taskId.current = undefined
+          }
         } else if (!isPalmFacingCamera(landmarks)) {
           setMessage(Messages.HAND_NEED_FACING)
+          // clear task id if hand not correct position
+          if (taskId.current) {
+            clearTimeout(taskId.current)
+            taskId.current = undefined
+          }
         } else if (!isPalmCloseToCamera(landmarks)) {
           setMessage(Messages.HAND_NEED_CLOSER)
+          // clear task id if hand not correct position
+          if (taskId.current) {
+            clearTimeout(taskId.current)
+            taskId.current = undefined
+          }
         } else {
           setMessage(Messages.KEEP_HAND_STILL)
           setShowPaw(false)
+
+          // hand in the correct position, start timer to close hand
+          if (!taskId.current) {
+            taskId.current = setTimeout(() => {
+              takePicture()
+              stopPredict.current = true
+            }, 3000)
+          }
         }
       } else {
         setMessage(Messages.NO_HAND_DETECTED)
         setShowPaw(true)
       }
 
-      if (result.gestures[0]) console.log('🖐️', result.gestures[0][0].categoryName)
-
-      requestRef.current = requestAnimationFrame(predictGresture)
+      // Keep predict in the next frame
+      requestRef.current = requestAnimationFrame(predictGesture)
     }
 
-    setupGestureRecoginzer().then(startCamera).catch(console.error)
+    setupGestureRecognizer().then(startCamera).catch(console.error)
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       landmarkerRef.current?.close()
     }
   }, [])
 
+  const takePicture = (): void => {
+    const video = videoRef.current
+    const canvas = document.createElement('canvas')
+
+    if (!video) return
+
+    const width = video.videoWidth
+    const height = video.videoHeight
+
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    ctx.drawImage(video, 0, 0, width, height)
+    const imageData = canvas.toDataURL('image/png')
+    setPicture(imageData)
+
+    // wait for second 3
+    setShowLoading(true)
+    setTimeout(() => {
+      onSubmit(imageData)
+      setShowLoading(false)
+    }, 3000)
+
+    console.log('📸 Picture taken')
+  }
+
   return (
-    <div>
-      <Container>
+    <FlexContainer>
+      <CameraContainer>
         {/*Camera */}
         <MaskedVideo
           ref={videoRef}
@@ -144,33 +187,41 @@ export const HandDetection = ({ onClosen }: Props): JSX.Element => {
           className="masked-video"
           width={600}
           height={600}
+          style={picture ? { display: 'none' } : {}}
         />
 
+        {picture && (
+          <img
+            className="masked-video"
+            src={picture}
+            alt="camera picture"
+            width={600}
+            height={600}
+          />
+        )}
         {/*display hand line */}
         <HandLine src={handLine} alt="hand line" />
 
-        {/*display video when hand not detected */}
-        {/*{showPaw && <HandLine src={handGif} alt="hand gif" onClick={() => setShowPaw(false)} />}*/}
-      </Container>
+        {/*Subtract color*/}
+        {/*<HandLine src={SubtractHand} alt="subtract hand" />*/}
 
-      <BtnMotion
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        type="button"
-        onClick={onClosen}
-        style={
-          message !== Messages.KEEP_HAND_STILL
-            ? { backgroundColor: 'var(--yellow-color)' }
-            : { backgroundColor: 'var(--green-color)' }
-        }
-      >
-        {message}
-      </BtnMotion>
-    </div>
+        {/*display video when hand not detected */}
+        {showPaw && <HandLine src={handGif} alt="hand gif" onClick={() => setShowPaw(false)} />}
+      </CameraContainer>
+
+      {showLoading && <Loading />}
+    </FlexContainer>
   )
 }
 
-const Container = styled.div`
+const FlexContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+`
+
+const CameraContainer = styled.div`
   position: relative;
   min-width: 400px;
   min-height: 400px;
@@ -180,6 +231,7 @@ const Container = styled.div`
 
   width: 60vw;
   height: 60vw;
+  margin: 0 auto;
 `
 
 const MaskedVideo = styled.video`
@@ -196,16 +248,3 @@ const HandLine = styled.img`
   width: 100%;
   height: 100%;
 `
-
-const StyledButton = styled.button`
-  font-weight: bold;
-  font-size: var(--text-lg);
-  padding: 1rem 4rem;
-  background-color: var(--yellow-color);
-  color: var(--button-text-color);
-  box-shadow: 0px 2px 100px 0px rgba(240, 209, 53, 1);
-  border-radius: 4rem;
-  max-width: 80vw;
-`
-
-const BtnMotion = motion(StyledButton)

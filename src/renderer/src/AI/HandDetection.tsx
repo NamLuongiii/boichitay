@@ -1,10 +1,12 @@
 import { JSX, useEffect, useRef, useState } from 'react'
-import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { FilesetResolver, GestureRecognizer, HandLandmarker } from '@mediapipe/tasks-vision'
 import handLandmarkerModel from './hand_landmarker.task?url'
+import grestureRecognizerModel from './gesture_recognizer.task?url'
 import styled from 'styled-components'
 import handLine from '@renderer/assets/hand_line.svg'
 import handGif from '@renderer/assets/hand-guide.gif'
 import { motion } from 'motion/react'
+import { isPalmCloseToCamera, isPalmFacingCamera, isPalmParallelToCamera } from '@renderer/AI/fns'
 
 type Props = {
   onClosen: () => void
@@ -12,11 +14,17 @@ type Props = {
 
 enum Messages {
   NO_HAND_DETECTED = 'No hand detected.',
-  HAND_DETECTED = 'Hand detected!'
+  HAND_DETECTED = 'Hand detected!',
+  HAND_NEED_PARALLEL = 'Hand needs to be parallel to camera.',
+  HAND_NEED_FACING = 'Hand needs to be facing camera.',
+  HAND_NEED_CLOSER = 'Hand needs to be closer to camera.',
+  KEEP_HAND_STILL = 'Keep your hand still for 3 seconds',
+  HAND_NEED_OPEN_PALM = 'Hand needs to be open.'
 }
 
 export const HandDetection = ({ onClosen }: Props): JSX.Element => {
   const landmarkerRef = useRef<HandLandmarker | null>(null)
+  const gestureRef = useRef<GestureRecognizer>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const requestRef = useRef<number | null>(null)
   const [showPaw, setShowPaw] = useState(true)
@@ -28,6 +36,18 @@ export const HandDetection = ({ onClosen }: Props): JSX.Element => {
       landmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: handLandmarkerModel, delegate: 'GPU' },
         runningMode: 'VIDEO', // Sang chế độ VIDEO
+        numHands: 1
+      })
+    }
+
+    async function setupGestureRecoginzer() {
+      const vision = await FilesetResolver.forVisionTasks('./wasm')
+      gestureRef.current = await GestureRecognizer.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: grestureRecognizerModel,
+          delegate: 'GPU'
+        },
+        runningMode: 'VIDEO',
         numHands: 1
       })
     }
@@ -45,10 +65,11 @@ export const HandDetection = ({ onClosen }: Props): JSX.Element => {
         // Start mediapipe when camera ready
         videoRef.current?.play()
 
-        setTimeout(() => predictWebcam(), 1000)
+        setTimeout(() => predictGresture(), 1000)
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const predictWebcam = (): void => {
       console.log('Predicting...')
       if (!videoRef.current || !landmarkerRef.current) return
@@ -72,7 +93,39 @@ export const HandDetection = ({ onClosen }: Props): JSX.Element => {
       }, 500)
     }
 
-    setupHandLandmarker().then(startCamera).catch(console.error)
+    async function predictGresture(): Promise<void> {
+      console.log('Predicting...')
+      if (!videoRef.current || !gestureRef.current) return
+
+      const result = gestureRef.current.recognizeForVideo(videoRef.current, performance.now())
+      console.log('Gesture result:', result)
+
+      const landmarks = result.landmarks[0]
+      if (landmarks) {
+        const gesture = result.gestures[0]?.[0]?.categoryName
+        if (gesture !== 'Open_Palm') {
+          setMessage(Messages.HAND_NEED_OPEN_PALM)
+        } else if (!isPalmParallelToCamera(landmarks)) {
+          setMessage(Messages.HAND_NEED_PARALLEL)
+        } else if (!isPalmFacingCamera(landmarks)) {
+          setMessage(Messages.HAND_NEED_FACING)
+        } else if (!isPalmCloseToCamera(landmarks)) {
+          setMessage(Messages.HAND_NEED_CLOSER)
+        } else {
+          setMessage(Messages.KEEP_HAND_STILL)
+          setShowPaw(false)
+        }
+      } else {
+        setMessage(Messages.NO_HAND_DETECTED)
+        setShowPaw(true)
+      }
+
+      if (result.gestures[0]) console.log('🖐️', result.gestures[0][0].categoryName)
+
+      requestRef.current = requestAnimationFrame(predictGresture)
+    }
+
+    setupGestureRecoginzer().then(startCamera).catch(console.error)
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current)
@@ -97,7 +150,7 @@ export const HandDetection = ({ onClosen }: Props): JSX.Element => {
         <HandLine src={handLine} alt="hand line" />
 
         {/*display video when hand not detected */}
-        {showPaw && <HandLine src={handGif} alt="hand gif" onClick={() => setShowPaw(false)} />}
+        {/*{showPaw && <HandLine src={handGif} alt="hand gif" onClick={() => setShowPaw(false)} />}*/}
       </Container>
 
       <BtnMotion
@@ -106,7 +159,7 @@ export const HandDetection = ({ onClosen }: Props): JSX.Element => {
         type="button"
         onClick={onClosen}
         style={
-          message === Messages.NO_HAND_DETECTED
+          message !== Messages.KEEP_HAND_STILL
             ? { backgroundColor: 'var(--yellow-color)' }
             : { backgroundColor: 'var(--green-color)' }
         }

@@ -95,7 +95,7 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
           // check hand direction by config
           const isLeftHand = result.handedness[0][0].categoryName === 'Left'
           const isRightHand = result.handedness[0][0].categoryName === 'Right'
-          const deepEstimation = estimateHandDepthByArea(landmarks, 0.7)
+          const deepEstimation = estimateHandDepthByArea(landmarks, 0.8)
 
           if (!isLeftHand && handDirection === 'left') {
             setMessage(Messages.ONLY_LEFT_HAND_ALLOWED)

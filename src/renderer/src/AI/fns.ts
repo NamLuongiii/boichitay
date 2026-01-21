@@ -115,7 +115,7 @@ export function isHandCentered(
 export function estimateHandDepthByArea(
   landmarks: NormalizedLandmark[],
   expectedArea: number,
-  tolerancePercent = 20 // %
+  tolerancePercent = 30 // %
 ): {
   area: number
   isInRange: boolean

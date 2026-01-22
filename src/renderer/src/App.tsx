@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { Result } from '@renderer/components/Result'
 import { HandDetect } from '@renderer/components/HandDetect'
 import { Loading } from '@renderer/components/Loading'
-import { analyzePalmFromCanvas } from '@renderer/AI/gemini'
 // import { Stars } from '@renderer/components/Stars'
 
 const StyledApp = styled.div`
@@ -13,6 +12,15 @@ const StyledApp = styled.div`
 export type TResult = {
   title: string
   content: string
+}
+
+declare global {
+  interface Window {
+    ai: {
+      listGeminiModels: () => Promise<string>
+      analyzePalmFromCanvas: (dataUrl: string) => Promise<string>
+    }
+  }
 }
 
 function App(): React.JSX.Element {
@@ -36,12 +44,14 @@ function App(): React.JSX.Element {
           }
         ])
 
+        // window.ai.listGeminiModels().then(console.log).catch(console.error)
         setPictureUrl(picture)
         setShowResult(true)
         setShowLoading(false)
-      }, 500)
+      }, 1000)
     } else
-      analyzePalmFromCanvas(picture)
+      window.ai
+        .analyzePalmFromCanvas(picture)
         .then((result) => {
           // parse result to json
           const parsedResult = JSON.parse(result) as TResult[]

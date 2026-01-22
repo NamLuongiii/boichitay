@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, session } from 'electron'
 import { join } from 'path'
 import { optimizer, is, electronApp } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { analyzePalmFromCanvas, listGeminiModels } from './gemini'
 
 function createWindow(): void {
   // Create the browser window.
@@ -56,6 +57,14 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  ipcMain.handle('gemini:listGeminiModels', async () => {
+    return await listGeminiModels()
+  })
+
+  ipcMain.handle('gemini:analyzePalmFromCanvas', async (_, dataUrl: string) => {
+    return await analyzePalmFromCanvas(dataUrl)
+  })
 
   createWindow()
 

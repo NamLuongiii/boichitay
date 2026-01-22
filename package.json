@@ -25,6 +25,7 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@google/generative-ai": "^0.24.1",
     "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
+    "dotenv": "^17.2.3",
     "motion": "^12.27.0",
     "styled-components": "^6.3.8"
   },

@@ -1,12 +1,16 @@
-import LoadingIcon from '../assets/loading-circle.svg'
 import styled from 'styled-components'
 import { JSX } from 'react'
 import { createPortal } from 'react-dom'
+import loadingVideo from '../assets/loading.mp4'
+
 export const Loading = (): JSX.Element => {
   return createPortal(
     <FlexContainer>
-      <img src={LoadingIcon} alt="Loading" />
-      <div>We are analyzing your hand, please wait a moment...</div>
+      <video src={loadingVideo} playsInline autoPlay muted loop></video>
+      <div>
+        <p>We are analyzing your hand,</p>
+        <p>please wait a moment...</p>
+      </div>
     </FlexContainer>,
     document.getElementById('root') as HTMLElement
   )
@@ -15,6 +19,8 @@ export const Loading = (): JSX.Element => {
 const FlexContainer = styled.div`
   display: flex;
   justify-content: center;
+  justify-items: center;
+  background: black;
 
   position: fixed;
   inset: 0;
@@ -22,15 +28,11 @@ const FlexContainer = styled.div`
   width: 100vw;
   height: 100vh;
 
-  img {
-    position: absolute;
-    width: 100vw;
-    height: 100%;
-  }
-
   div {
     position: absolute;
-    bottom: 200px;
+    bottom: 100px;
     z-index: 1;
+    width: fit-content;
+    text-align: center;
   }
 `

@@ -239,7 +239,14 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
         {/*<HandLine src={SubtractHand} alt="subtract hand" />*/}
 
         {/*display video when hand not detected */}
-        {showPaw && <HandLine src={handGif} alt="hand gif" onClick={() => setShowPaw(false)} />}
+        {showPaw && (
+          <HandLine
+            src={handGif}
+            alt="hand gif"
+            style={{ display: 'none' }}
+            onClick={() => setShowPaw(false)}
+          />
+        )}
       </CameraContainer>
     </FlexContainer>
   )

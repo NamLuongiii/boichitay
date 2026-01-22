@@ -82,17 +82,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-image: url("background/background.png"), url("background/background.svg");
+  background-image: url("background/background.png");
 
-  background-size: cover,
-  cover;
+  background-size: cover;
 
-  background-repeat: no-repeat,
-  no-repeat;
+  background-repeat: no-repeat;
 
-  background-position: center,
-  center;
-
+  background-position: center;
+  
   font-size: var(--text-normal);
 }
 

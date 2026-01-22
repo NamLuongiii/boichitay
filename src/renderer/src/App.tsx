@@ -19,7 +19,7 @@ declare global {
   interface Window {
     ai: {
       listGeminiModels: () => Promise<string>
-      analyzePalmFromCanvas: (dataUrl: string) => Promise<string>
+      analyzePalmFromCanvas: (dataUrl: string, handDirection: 'Left' | 'Right') => Promise<string>
     }
   }
 }
@@ -31,7 +31,7 @@ function App(): React.JSX.Element {
   const [result, setResult] = useState<TResult[]>([])
   const [componentKey, setComponentKey] = useState(0)
 
-  const onSubmit = (picture: string): void => {
+  const onSubmit = (picture: string, handDirection: 'Left' | 'Right'): void => {
     setShowLoading(true)
 
     const showDemo = false
@@ -53,7 +53,7 @@ function App(): React.JSX.Element {
       }, 1000)
     } else
       window.ai
-        .analyzePalmFromCanvas(picture)
+        .analyzePalmFromCanvas(picture, handDirection)
         .then((result) => {
           // parse result to json
           const parsedResult = JSON.parse(result) as TResult[]

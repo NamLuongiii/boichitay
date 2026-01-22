@@ -62,9 +62,12 @@ app.whenReady().then(() => {
     return await listGeminiModels()
   })
 
-  ipcMain.handle('gemini:analyzePalmFromCanvas', async (_, dataUrl: string) => {
-    return await analyzePalmFromCanvas(dataUrl)
-  })
+  ipcMain.handle(
+    'gemini:analyzePalmFromCanvas',
+    async (_, dataUrl: string, hanDirection: 'Left' | 'Right') => {
+      return await analyzePalmFromCanvas(dataUrl, hanDirection)
+    }
+  )
 
   createWindow()
 

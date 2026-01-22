@@ -1,11 +1,27 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import 'dotenv/config.js'
 
-const geminiKey = 'AIzaSyCbnOqU7X-aMWAEdtbpGRRCliFQ86thPGU'
-const geminiModel = 'models/gemini-2.5-flash'
+const geminiKey = process.env.GEMINI_KEY || ''
+const geminiModel = process.env.GEMINI_MODEL || ''
 const genAI = new GoogleGenerativeAI(geminiKey)
 
-const PROMPT_EN = `
+export async function analyzePalmFromCanvas(
+  dataUrl: string,
+  handDirection: 'Left' | 'Right'
+): Promise<string> {
+  const base64Image = dataUrl.split(',')[1] // bỏ "data:image/png;base64,"
+
+  // 2. Chọn model MULTIMODAL
+  const model = genAI.getGenerativeModel({
+    model: geminiModel
+  })
+
+  const isEnglish = false
+
+  const PROMPT_EN = `
 You are a professional palm reader providing objective and confident analysis.
+
+Hand: ${handDirection}
 
 Requirements:
 
@@ -35,8 +51,10 @@ JSON structure (exact order):
 
 `
 
-const PROMPT_VI = `
+  const PROMPT_VI = `
 Bạn là chuyên gia xem chỉ tay, phân tích khách quan và chuyên nghiệp.
+
+Bàn tay: ${handDirection}
 
 Định dạng:
 
@@ -63,16 +81,6 @@ Cấu trúc JSON (đúng thứ tự):
 { "title": "Vận hạn", "content": "..." }
 ]
 `
-
-export async function analyzePalmFromCanvas(dataUrl: string): Promise<string> {
-  const base64Image = dataUrl.split(',')[1] // bỏ "data:image/png;base64,"
-
-  // 2. Chọn model MULTIMODAL
-  const model = genAI.getGenerativeModel({
-    model: geminiModel
-  })
-
-  const isEnglish = false
 
   // 3. Gửi ảnh + prompt
   const result = await model.generateContent([

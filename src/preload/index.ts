@@ -13,8 +13,8 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('api', api)
     contextBridge.exposeInMainWorld('ai', {
       listGeminiModels: () => ipcRenderer.invoke('gemini:listGeminiModels'),
-      analyzePalmFromCanvas: (dataUrl: string) =>
-        ipcRenderer.invoke('gemini:analyzePalmFromCanvas', dataUrl)
+      analyzePalmFromCanvas: (dataUrl: string, handDirection: 'Left' | 'Right') =>
+        ipcRenderer.invoke('gemini:analyzePalmFromCanvas', dataUrl, handDirection)
     })
   } catch (error) {
     console.error(error)

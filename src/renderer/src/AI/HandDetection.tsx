@@ -14,7 +14,7 @@ import handGif from '@renderer/assets/hand/hand-guide.gif'
 
 type Props = {
   setMessage(msg: Messages): void
-  onSubmit(picture: string): void
+  onSubmit(picture: string, handDirection: 'Left' | 'Right'): void
   handDirection?: 'left' | 'right'
 }
 
@@ -142,7 +142,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
             // hand in the correct position, start timer to close hand
             if (!taskId.current) {
               taskId.current = setTimeout(() => {
-                takePicture()
+                takePicture(handDirection)
                 stopPredict.current = true
               }, 3000)
             }
@@ -167,7 +167,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
     }
   }, [])
 
-  const takePicture = (): void => {
+  const takePicture = (handDirection: 'Left' | 'Right'): void => {
     const video = videoRef.current
     const canvas = document.createElement('canvas')
 
@@ -188,7 +188,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
 
     // wait for 1.5s for user preview picture
     setTimeout(() => {
-      onSubmit(imageData)
+      onSubmit(imageData, handDirection)
     }, 1500)
 
     console.log('📸 Picture taken')

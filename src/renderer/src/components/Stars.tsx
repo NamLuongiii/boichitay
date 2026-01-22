@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from 'react'
+import { JSX, useState } from 'react'
 import { motion } from 'framer-motion'
 import styled from 'styled-components'
 
@@ -10,57 +10,68 @@ type Star = {
   type: 'star' | 'circle'
   opacity: number
   rotate: number
+  duration: number
+}
+
+function createRandom(id: number): Star {
+  return {
+    id: id,
+    size: Math.random() * 20 + 10,
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    type: Math.random() > 0.5 ? 'star' : 'circle',
+    opacity: Math.random() > 0.5 ? 0.9 : 0.5,
+    rotate: Math.random() * 360,
+    duration: Math.random() * 10 + 3
+  }
 }
 
 function createRandomStars(): Star[] {
   const stars: Star[] = []
   for (let i = 0; i < 10; i++) {
-    stars.push({
-      id: i,
-      size: Math.random() * 20 + 10,
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      type: Math.random() > 0.5 ? 'star' : 'circle',
-      opacity: Math.random() > 0.5 ? 0.9 : 0.5,
-      rotate: Math.random() * 360
-    })
+    stars.push(createRandom(i))
   }
   return stars
 }
 
-const _stars: Star[] = createRandomStars()
-
 export const Stars = (): JSX.Element => {
-  const [stars, setStars] = useState<Star[]>(_stars)
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setStars(createRandomStars())
-    }, 7000)
-
-    return () => clearInterval(intervalId)
-  }, [stars])
-
+  const [stars] = useState(createRandomStars())
   return (
     <StyledStars>
       {stars.map((star) => (
-        <motion.div
-          key={star.id}
-          initial={{ scale: 0, opacity: 0, rotate: [star.rotate, star.rotate + 360] }}
-          animate={{ scale: [0, 1.6, 1], opacity: [0, star.opacity, 0] }}
-          transition={{ duration: 7, ease: 'easeInOut', repeat: Infinity }}
-          style={{
-            position: 'absolute',
-            left: star.x,
-            top: star.y,
-            width: star.size,
-            height: star.size
-          }}
-        >
-          {star.type === 'star' ? <StarSVG /> : <CircleSVG />}
-        </motion.div>
+        <RandomStar key={star.id} star={star} />
       ))}
     </StyledStars>
+  )
+}
+
+const RandomStar = ({ star }: { star: Star }): JSX.Element => {
+  // const [star, setStar] = useState(initialStar)
+
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setStar(createRandom(initialStar.id))
+  //   }, initialStar.duration)
+  //
+  //   return () => clearInterval(timer)
+  // }, [initialStar])
+
+  return (
+    <motion.div
+      key={star.id}
+      initial={{ scale: 0, opacity: 0, rotate: [star.rotate, star.rotate + 360] }}
+      animate={{ scale: [0, 1.6, 1], opacity: [0, star.opacity, 0] }}
+      transition={{ duration: 7, ease: 'easeInOut', repeat: Infinity }}
+      style={{
+        position: 'absolute',
+        left: star.x,
+        top: star.y,
+        width: star.size,
+        height: star.size
+      }}
+    >
+      {star.type === 'star' ? <StarSVG /> : <CircleSVG />}
+    </motion.div>
   )
 }
 

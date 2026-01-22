@@ -6,8 +6,6 @@ import { HandDetection, Messages } from '@renderer/AI/HandDetection'
 type Props = {
   onSubmit(picture: string): void
 }
-const handDirection = import.meta.env.VITE_HAND_DIRECTION
-
 const Container = styled.div`
   position: relative;
   min-height: 100vh;
@@ -37,11 +35,7 @@ export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
       {/*Logo */}
       <Logo src={logo} alt="logo" />
 
-      <HandDetection
-        setMessage={setMessage}
-        onSubmit={onSubmit}
-        handDirection={(handDirection as 'left' | 'right') || 'left'}
-      />
+      <HandDetection setMessage={setMessage} onSubmit={onSubmit} />
 
       <Bottom>
         {message === Messages.KEEP_HAND_STILL ? (

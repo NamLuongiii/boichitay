@@ -1,8 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import 'dotenv/config'
 
-const geminiKey = process.env.GEMINI_API_KEY || ''
-const geminiModel = process.env.GEMINI_MODEL || ''
+const geminiKey = 'AIzaSyCbnOqU7X-aMWAEdtbpGRRCliFQ86thPGU'
+const geminiModel = 'models/gemini-2.5-flash'
 const genAI = new GoogleGenerativeAI(geminiKey)
 
 const PROMPT_EN = `
@@ -15,21 +14,19 @@ Requirements:
 * Analyze directly from the palm image
 * Make clear, strong, dramatic judgments (no vague wording)
 * Use simple, concise language
+* Palm Description describe main palm lines, hand shape, skin texture, calluses, and notable features.
 
 Output rules:
 
-* Return ONLY a valid JSON string
+* Return ONLY a valid JSON string as [{ "title": "content" }, ... ]
 * No markdown, no explanations outside JSON
-* Multiple sections, each on a new line
-* Each section has a title in square brackets []
-* The first section MUST be [Palm Description]
 
 Mandatory:
-[Palm Description]: describe main palm lines, hand shape, skin texture, calluses, and notable features.
 
 JSON structure (exact order):
 
 [
+{ "title": "Palm Description", "content": "..." },
 { "title": "Personality", "content": "..." },
 { "title": "Love", "content": "..." },
 { "title": "Wealth", "content": "..." },
@@ -41,6 +38,12 @@ JSON structure (exact order):
 const PROMPT_VI = `
 Bạn là chuyên gia xem chỉ tay, phân tích khách quan và chuyên nghiệp.
 
+Định dạng:
+
+* Chỉ trả về JSON string hợp lệ có định dạng sau [{ "title": "content" }, ... ]
+* Không markdown, không giải thích ngoài JSON
+* Không bị lỗi JSON.parse
+
 Yêu cầu:
 
 * Trả lời 100% bằng tiếng Việt
@@ -48,21 +51,12 @@ Yêu cầu:
 * Phân tích trực tiếp từ hình ảnh bàn tay
 * Nhận định rõ ràng, dứt khoát, có “drama”, không chung chung
 * Ngôn từ dễ hiểu, ngắn gọn
-
-Định dạng:
-
-* Chỉ trả về JSON string hợp lệ
-* Không markdown, không giải thích ngoài JSON
-* Gồm nhiều đoạn, mỗi đoạn một dòng
-* Mỗi đoạn có tiêu đề trong ngoặc vuông []
-* Đoạn đầu tiên luôn là [Mô tả tay]
-
-Bắt buộc:
-[Mô tả tay]: mô tả các đường chỉ tay chính, hình dạng bàn tay, da tay, vết sần, dấu hiệu nổi bật.
+* Mô tả tay: mô tả các đường chỉ tay chính, hình dạng bàn tay, da tay, vết sần, dấu hiệu nổi bật.
 
 Cấu trúc JSON (đúng thứ tự):
 
 [
+{ "title": "Mô tả tay", "content": "..." },
 { "title": "Tính cách", "content": "..." },
 { "title": "Tình duyên", "content": "..." },
 { "title": "Tiền tài", "content": "..." },
@@ -78,7 +72,7 @@ export async function analyzePalmFromCanvas(dataUrl: string): Promise<string> {
     model: geminiModel
   })
 
-  const isEnglish = true
+  const isEnglish = false
 
   // 3. Gửi ảnh + prompt
   const result = await model.generateContent([

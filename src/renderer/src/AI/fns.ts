@@ -57,7 +57,10 @@ export function isPalmParallelToCamera(landmarks: NormalizedLandmark[], threshol
   return zRatio > threshold
 }
 
-export function isPalmFacingCamera(landmarks: NormalizedLandmark[]): boolean {
+export function isPalmFacingCamera(
+  handDirection: 'Left' | 'Right',
+  landmarks: NormalizedLandmark[]
+): boolean {
   const wrist = landmarks[0]
   const index = landmarks[5]
   const pinky = landmarks[17]
@@ -76,10 +79,7 @@ export function isPalmFacingCamera(landmarks: NormalizedLandmark[]): boolean {
 
   const normalZ = v1.x * v2.y - v1.y * v2.x
 
-  // check base on a hand direction
-  const handDirection = import.meta.env.VITE_HAND_DIRECTION
-
-  return handDirection === 'right' ? normalZ < 0 : normalZ > 0
+  return handDirection === 'Right' ? normalZ < 0 : normalZ > 0
 }
 
 export function isHandCentered(

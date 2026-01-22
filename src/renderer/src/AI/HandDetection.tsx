@@ -27,8 +27,6 @@ export enum Messages {
   HAND_NEED_DEEP = 'Hand needs to be deeper in the camera.',
   KEEP_HAND_STILL = 'Hold the position for 3 seconds',
   HAND_NEED_OPEN_PALM = 'Hand needs to be open.',
-  ONLY_LEFT_HAND_ALLOWED = 'Only left hand is allowed.',
-  ONLY_RIGHT_HAND_ALLOWED = 'Only right hand is allowed.',
   HAND_NEED_CENTER = 'Hand needs to be in the center of the camera.'
 }
 
@@ -36,7 +34,7 @@ enum GESTURES {
   OPEN_PALM = 'Open_Palm'
 }
 
-export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): JSX.Element => {
+export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
   const landmarkerRef = useRef<HandLandmarker | null>(null)
   const gestureRef = useRef<GestureRecognizer>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -93,23 +91,10 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
 
           const gesture = result.gestures[0]?.[0]?.categoryName
           // check hand direction by config
-          const isLeftHand = result.handedness[0][0].categoryName === 'Left'
-          const isRightHand = result.handedness[0][0].categoryName === 'Right'
+          const handDirection = result.handedness[0][0].categoryName as 'Left' | 'Right'
           const deepEstimation = estimateHandDepthByArea(landmarks, 0.8)
 
-          if (!isLeftHand && handDirection === 'left') {
-            setMessage(Messages.ONLY_LEFT_HAND_ALLOWED)
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else if (!isRightHand && handDirection === 'right') {
-            setMessage(Messages.ONLY_RIGHT_HAND_ALLOWED)
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else if (gesture !== GESTURES.OPEN_PALM) {
+          if (gesture !== GESTURES.OPEN_PALM) {
             setMessage(Messages.HAND_NEED_OPEN_PALM)
             // clear task id if hand not correct position
             if (taskId.current) {
@@ -123,7 +108,7 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
               clearTimeout(taskId.current)
               taskId.current = undefined
             }
-          } else if (!isPalmFacingCamera(landmarks)) {
+          } else if (!isPalmFacingCamera(handDirection, landmarks)) {
             setMessage(Messages.HAND_NEED_FACING)
             // clear task id if hand not correct position
             if (taskId.current) {

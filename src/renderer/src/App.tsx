@@ -4,6 +4,7 @@ import { Result } from '@renderer/components/Result'
 import { HandDetect } from '@renderer/components/HandDetect'
 import { Loading } from '@renderer/components/Loading'
 // import { Stars } from '@renderer/components/Stars'
+// import { Stars } from '@renderer/components/Stars'
 
 const StyledApp = styled.div`
   position: relative;
@@ -28,6 +29,7 @@ function App(): React.JSX.Element {
   const [pictureUrl, setPictureUrl] = useState<string>()
   const [showLoading, setShowLoading] = useState(false)
   const [result, setResult] = useState<TResult[]>([])
+  const [componentKey, setComponentKey] = useState(0)
 
   const onSubmit = (picture: string): void => {
     setShowLoading(true)
@@ -65,6 +67,8 @@ function App(): React.JSX.Element {
           console.error(err)
           setShowLoading(false)
           alert(err.message)
+
+          setComponentKey(componentKey + 1)
         })
   }
 
@@ -73,7 +77,7 @@ function App(): React.JSX.Element {
       {showResult && pictureUrl ? (
         <Result tryAgain={() => setShowResult(false)} pictureUrl={pictureUrl} result={result} />
       ) : (
-        <HandDetect onSubmit={onSubmit} />
+        <HandDetect key={componentKey} onSubmit={onSubmit} />
       )}
 
       {/*<Stars />*/}

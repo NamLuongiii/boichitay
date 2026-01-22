@@ -57,6 +57,10 @@ export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
 }
 
 const Bottom = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   padding: 2rem;
   background: var(--footer-gradient);
   width: 100%;

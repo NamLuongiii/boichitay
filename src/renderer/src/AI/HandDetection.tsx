@@ -218,20 +218,10 @@ export const HandDetection = ({ setMessage, onSubmit, handDirection }: Props): J
           autoPlay
           playsInline
           className={'masked-video'}
-          width={600}
-          height={600}
           style={picture ? { display: 'none' } : {}}
         />
 
-        {picture && (
-          <img
-            className={'masked-video'}
-            src={picture}
-            alt="camera picture"
-            width={600}
-            height={600}
-          />
-        )}
+        {picture && <MaskedPicture className={'masked-video'} src={picture} alt="camera picture" />}
         {/*display hand line */}
         <HandLine src={handLine} alt="hand line" />
 
@@ -261,18 +251,18 @@ const FlexContainer = styled.div`
 
 const CameraContainer = styled.div`
   position: relative;
-  min-width: 400px;
-  min-height: 400px;
-
-  max-width: 600px;
-  max-height: 600px;
-
-  width: 60vw;
-  height: 60vw;
-  margin: 0 auto;
+  height: 85vh;
+  aspect-ratio: 1/1;
 `
 
 const MaskedVideo = styled.video`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+`
+
+const MaskedPicture = styled.img`
   position: relative;
   width: 100%;
   height: 100%;

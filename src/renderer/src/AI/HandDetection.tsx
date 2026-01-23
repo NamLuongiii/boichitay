@@ -4,10 +4,10 @@ import gestureRecognizerModel from './gesture_recognizer.task?url'
 import styled from 'styled-components'
 import handLine from '@renderer/assets/hand/hand_line.svg'
 import {
-  minAreaAllowed,
   isHandCentered,
   isPalmFacingCamera,
-  isPalmParallelToCamera
+  isPalmParallelToCamera,
+  minAreaAllowed
 } from '@renderer/AI/fns'
 import handGif from '@renderer/assets/hand/hand-guide.gif'
 // import SubtractHand from '../assets/hand/Subtract.svg'
@@ -63,14 +63,19 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
         audio: false
       })
 
-      if (videoRef.current) {
-        // Stream camera to a video element
-        videoRef.current.srcObject = stream
+      const video = videoRef.current
+      if (video) {
+        video.srcObject = stream
+        await video.play()
 
-        // Start mediapipe when camera ready
-        videoRef.current?.play()
-
-        setTimeout(() => predictGesture(), 1000)
+        video.requestVideoFrameCallback(() => {
+          if (video.videoWidth > 0 && video.videoHeight > 0) {
+            predictGesture().then()
+            return
+          } else {
+            setTimeout(() => video.requestVideoFrameCallback(predictGesture), 1000)
+          }
+        })
       }
     }
 

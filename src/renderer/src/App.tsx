@@ -34,7 +34,7 @@ function App(): React.JSX.Element {
   const onSubmit = (picture: string, handDirection: 'Left' | 'Right'): void => {
     setShowLoading(true)
 
-    const showDemo = false
+    const showDemo = true
 
     if (showDemo) {
       // await 3s

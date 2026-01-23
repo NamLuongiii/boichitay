@@ -9,10 +9,10 @@ export function getHandBoundingBoxArea(landmarks: NormalizedLandmark[]): {
     return { area: 0, width: 0, height: 0 }
   }
 
-  let minX = 1
-  let minY = 1
-  let maxX = 0
-  let maxY = 0
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
 
   for (const lm of landmarks) {
     minX = Math.min(minX, lm.x)
@@ -28,7 +28,7 @@ export function getHandBoundingBoxArea(landmarks: NormalizedLandmark[]): {
   return { area, width, height }
 }
 
-export function isPalmParallelToCamera(landmarks: NormalizedLandmark[], threshold = 0.1): boolean {
+export function isPalmParallelToCamera(landmarks: NormalizedLandmark[], threshold = 0.05): boolean {
   const wrist = landmarks[0]
   const index = landmarks[5]
   const pinky = landmarks[17]
@@ -112,24 +112,25 @@ export function isHandCentered(
   return dx <= tolerance && dy <= tolerance
 }
 
-export function estimateHandDepthByArea(
+export function minAreaAllowed(
   landmarks: NormalizedLandmark[],
-  expectedArea: number,
-  tolerancePercent = 20 // %
+  expectedArea: number
 ): {
   area: number
   isInRange: boolean
-  diffPercent: number
 } {
   const { area } = getHandBoundingBoxArea(landmarks)
 
-  const diffPercent = ((area - expectedArea) / expectedArea) * 100
-
-  const isInRange = Math.abs(diffPercent) <= tolerancePercent
-
   return {
     area,
-    isInRange,
-    diffPercent
+    isInRange: area >= expectedArea
   }
+}
+
+export function isFullHandInView(landmarks: NormalizedLandmark[], tolerance = 0): boolean {
+  if (!landmarks || landmarks.length !== 21) return false
+
+  return landmarks.every(
+    ({ x, y }) => x >= -tolerance && x <= 1 + tolerance && y >= -tolerance && y <= 1 + tolerance
+  )
 }

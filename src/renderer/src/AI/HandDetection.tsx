@@ -4,7 +4,8 @@ import gestureRecognizerModel from './gesture_recognizer.task?url'
 import styled from 'styled-components'
 import handLine from '@renderer/assets/hand/hand_line.svg'
 import {
-  estimateHandDepthByArea,
+  minAreaAllowed,
+  isFullHandInView,
   isHandCentered,
   isPalmFacingCamera,
   isPalmParallelToCamera
@@ -15,7 +16,6 @@ import handGif from '@renderer/assets/hand/hand-guide.gif'
 type Props = {
   setMessage(msg: Messages): void
   onSubmit(picture: string, handDirection: 'Left' | 'Right'): void
-  handDirection?: 'left' | 'right'
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -24,10 +24,10 @@ export enum Messages {
   HAND_NEED_PARALLEL = 'Hand needs to be parallel to camera.',
   HAND_NEED_FACING = 'Hand needs to be facing camera.',
   HAND_NEED_CLOSER = 'Hand needs to be closer to camera.',
-  HAND_NEED_DEEP = 'Hand needs to be deeper in the camera.',
   KEEP_HAND_STILL = 'Hold the position for 3 seconds',
   HAND_NEED_OPEN_PALM = 'Hand needs to be open.',
-  HAND_NEED_CENTER = 'Hand needs to be in the center of the camera.'
+  HAND_NEED_CENTER = 'Hand needs to be in the center of the camera.',
+  HAND_NEED_IN_VIEW = 'Hand needs to be in the view of the camera.'
 }
 
 enum GESTURES {
@@ -92,13 +92,15 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           // check hand direction by config
           const gesture = result.gestures[0]?.[0]?.categoryName
           const handDirection = result.handedness[0][0].categoryName as 'Left' | 'Right'
-          const deepEstimation = estimateHandDepthByArea(landmarks, 0.8)
+          // const deepEstimation = estimateHandDepthByArea(landmarks, 0.8)
           const isOpen = gesture === GESTURES.OPEN_PALM
           const isParallel = isPalmParallelToCamera(landmarks)
           const isFacing = isPalmFacingCamera(handDirection, landmarks)
           const isCentered = isHandCentered(landmarks)
+          const isInView = isFullHandInView(landmarks)
+          const { isInRange } = minAreaAllowed(landmarks, 0.5)
 
-          if (isOpen && isFacing && isCentered && isParallel && deepEstimation.isInRange) {
+          if (isInView && isOpen && isFacing && isParallel && isCentered && isInRange) {
             // Hand in the correct position
             setMessage(Messages.KEEP_HAND_STILL)
 
@@ -111,18 +113,12 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
             }
           } else {
             // show message according to the hand position
-            if (!isOpen) setMessage(Messages.HAND_NEED_OPEN_PALM)
+            if (!isInView) setMessage(Messages.HAND_NEED_IN_VIEW)
+            else if (!isOpen) setMessage(Messages.HAND_NEED_OPEN_PALM)
             else if (!isFacing) setMessage(Messages.HAND_NEED_FACING)
-            else if (!isCentered) setMessage(Messages.HAND_NEED_CENTER)
             else if (!isParallel) setMessage(Messages.HAND_NEED_PARALLEL)
-            else if (!deepEstimation.isInRange) {
-              if (deepEstimation.diffPercent > 0) {
-                console.log(':hand hand too deep', landmarks)
-              }
-              setMessage(
-                deepEstimation.diffPercent < 0 ? Messages.HAND_NEED_CLOSER : Messages.HAND_NEED_DEEP
-              )
-            }
+            else if (!isCentered) setMessage(Messages.HAND_NEED_CENTER)
+            else if (!isInRange) setMessage(Messages.HAND_NEED_CLOSER)
 
             // clear task id if hand not correct position
             if (taskId.current) {

@@ -89,62 +89,45 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           // Hand detected
           setShowPaw(false)
 
-          const gesture = result.gestures[0]?.[0]?.categoryName
           // check hand direction by config
+          const gesture = result.gestures[0]?.[0]?.categoryName
           const handDirection = result.handedness[0][0].categoryName as 'Left' | 'Right'
           const deepEstimation = estimateHandDepthByArea(landmarks, 0.8)
+          const isOpen = gesture === GESTURES.OPEN_PALM
+          const isParallel = isPalmParallelToCamera(landmarks)
+          const isFacing = isPalmFacingCamera(handDirection, landmarks)
+          const isCentered = isHandCentered(landmarks)
 
-          if (gesture !== GESTURES.OPEN_PALM) {
-            setMessage(Messages.HAND_NEED_OPEN_PALM)
-            // clear task id if hand not correct position
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else if (!isPalmParallelToCamera(landmarks)) {
-            setMessage(Messages.HAND_NEED_PARALLEL)
-            // clear task id if hand not correct position
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else if (!isPalmFacingCamera(handDirection, landmarks)) {
-            setMessage(Messages.HAND_NEED_FACING)
-            // clear task id if hand not correct position
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else if (!isHandCentered(landmarks)) {
-            setMessage(Messages.HAND_NEED_CENTER)
-            // clear task id if hand not correct position
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else if (!deepEstimation.isInRange && deepEstimation.diffPercent < 0) {
-            setMessage(Messages.HAND_NEED_CLOSER)
-            // clear task id if hand not correct position
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else if (!deepEstimation.isInRange && deepEstimation.diffPercent > 0) {
-            setMessage(Messages.HAND_NEED_DEEP)
-            // clear task id if hand not correct position
-            if (taskId.current) {
-              clearTimeout(taskId.current)
-              taskId.current = undefined
-            }
-          } else {
+          if (isOpen && isFacing && isCentered && isParallel && deepEstimation.isInRange) {
+            // Hand in the correct position
             setMessage(Messages.KEEP_HAND_STILL)
 
-            // hand in the correct position, start timer to close hand
+            // hand in the correct position, start timer 3s then take the picture
             if (!taskId.current) {
               taskId.current = setTimeout(() => {
                 takePicture(handDirection)
                 stopPredict.current = true
               }, 3000)
+            }
+          } else {
+            // show message according to the hand position
+            if (!isOpen) setMessage(Messages.HAND_NEED_OPEN_PALM)
+            else if (!isFacing) setMessage(Messages.HAND_NEED_FACING)
+            else if (!isCentered) setMessage(Messages.HAND_NEED_CENTER)
+            else if (!isParallel) setMessage(Messages.HAND_NEED_PARALLEL)
+            else if (!deepEstimation.isInRange) {
+              if (deepEstimation.diffPercent > 0) {
+                console.log(':hand hand too deep', landmarks)
+              }
+              setMessage(
+                deepEstimation.diffPercent < 0 ? Messages.HAND_NEED_CLOSER : Messages.HAND_NEED_DEEP
+              )
+            }
+
+            // clear task id if hand not correct position
+            if (taskId.current) {
+              clearTimeout(taskId.current)
+              taskId.current = undefined
             }
           }
         } else {
@@ -236,7 +219,7 @@ const FlexContainer = styled.div`
 
 const CameraContainer = styled.div`
   position: relative;
-  height: 85vh;
+  height: 100%;
   aspect-ratio: 1/1;
 `
 
@@ -245,6 +228,7 @@ const MaskedVideo = styled.video`
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border: 2px solid green;
 `
 
 const MaskedPicture = styled.img`

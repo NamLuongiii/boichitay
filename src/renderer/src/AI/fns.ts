@@ -126,11 +126,3 @@ export function minAreaAllowed(
     isInRange: area >= expectedArea
   }
 }
-
-export function isFullHandInView(landmarks: NormalizedLandmark[], tolerance = 0): boolean {
-  if (!landmarks || landmarks.length !== 21) return false
-
-  return landmarks.every(
-    ({ x, y }) => x >= -tolerance && x <= 1 + tolerance && y >= -tolerance && y <= 1 + tolerance
-  )
-}

@@ -5,7 +5,6 @@ import styled from 'styled-components'
 import handLine from '@renderer/assets/hand/hand_line.svg'
 import {
   minAreaAllowed,
-  isFullHandInView,
   isHandCentered,
   isPalmFacingCamera,
   isPalmParallelToCamera
@@ -97,10 +96,9 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           const isParallel = isPalmParallelToCamera(landmarks)
           const isFacing = isPalmFacingCamera(handDirection, landmarks)
           const isCentered = isHandCentered(landmarks)
-          const isInView = isFullHandInView(landmarks)
           const { isInRange } = minAreaAllowed(landmarks, 0.4)
 
-          if (isInView && isOpen && isFacing && isParallel && isCentered && isInRange) {
+          if (isOpen && isFacing && isParallel && isCentered && isInRange) {
             // Hand in the correct position
             setMessage(Messages.KEEP_HAND_STILL)
 
@@ -113,8 +111,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
             }
           } else {
             // show message according to the hand position
-            if (!isInView) setMessage(Messages.HAND_NEED_IN_VIEW)
-            else if (!isOpen) setMessage(Messages.HAND_NEED_OPEN_PALM)
+            if (!isOpen) setMessage(Messages.HAND_NEED_OPEN_PALM)
             else if (!isFacing) setMessage(Messages.HAND_NEED_FACING)
             else if (!isParallel) setMessage(Messages.HAND_NEED_PARALLEL)
             else if (!isCentered) setMessage(Messages.HAND_NEED_CENTER)

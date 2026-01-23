@@ -22,6 +22,6 @@ export const metapipeUlties = {
       throw new Error('No hand detected')
     }
 
-    return 'abc'
+    return result.landmarks[0]
   }
 }

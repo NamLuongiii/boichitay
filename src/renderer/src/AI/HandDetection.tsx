@@ -10,6 +10,8 @@ import {
   minAreaAllowed
 } from '@renderer/AI/fns'
 import handGif from '@renderer/assets/hand/hand-guide.gif'
+import { segmentationImage } from '@renderer/AI/OpenCV'
+import { metapipeUlties } from '@renderer/AI/metapipeUltis'
 // import SubtractHand from '../assets/hand/Subtract.svg'
 
 type Props = {
@@ -164,13 +166,26 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
     if (!ctx) return
 
     ctx.drawImage(video, 0, 0, width, height)
-    const imageData = canvas.toDataURL('image/png')
-    setPicture(imageData)
+    // const imageData = canvas.toDataURL('image/png')
+    // setPicture(imageData)
+
+    metapipeUlties
+      .processingImage(canvas)
+      .then((landmarks) => {
+        const outputCanvas = document.createElement('canvas')
+        segmentationImage(landmarks, canvas, outputCanvas)
+          .then(() => {
+            const imageData = outputCanvas.toDataURL('image/png')
+            setPicture(imageData)
+          })
+          .catch(console.error)
+      })
+      .catch(console.error)
 
     // wait for 1.5s for user preview picture
-    setTimeout(() => {
-      onSubmit(imageData, handDirection)
-    }, 1500)
+    // setTimeout(() => {
+    //   onSubmit(imageData, handDirection)
+    // }, 1500)
 
     console.log('📸 Picture taken')
   }
@@ -183,7 +198,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           ref={videoRef}
           autoPlay
           playsInline
-          className={'masked-video'}
+          // className={'masked-video'}
           style={picture ? { display: 'none' } : {}}
         />
 

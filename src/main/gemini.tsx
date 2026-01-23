@@ -13,7 +13,10 @@ export async function analyzePalmFromCanvas(
 
   // 2. Chọn model MULTIMODAL
   const model = genAI.getGenerativeModel({
-    model: geminiModel
+    model: geminiModel,
+    generationConfig: {
+      responseMimeType: 'application/json'
+    }
   })
 
   const isEnglish = false
@@ -48,7 +51,6 @@ JSON structure (exact order):
 { "title": "Wealth", "content": "..." },
 { "title": "Fate", "content": "..." }
 ]
-
 `
 
   const PROMPT_VI = `

@@ -98,7 +98,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           const isFacing = isPalmFacingCamera(handDirection, landmarks)
           const isCentered = isHandCentered(landmarks)
           const isInView = isFullHandInView(landmarks)
-          const { isInRange } = minAreaAllowed(landmarks, 0.5)
+          const { isInRange } = minAreaAllowed(landmarks, 0.4)
 
           if (isInView && isOpen && isFacing && isParallel && isCentered && isInRange) {
             // Hand in the correct position

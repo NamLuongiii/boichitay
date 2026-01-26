@@ -28,6 +28,14 @@ Hand: ${handDirection}
 
 Requirements:
 
+RESPONSE RULES:
+- Respond ONLY with valid JSON
+- No markdown
+- No explanation
+- No comments
+- No trailing commas
+- UTF-8 plain text
+
 * Respond 100% in English
 * Do NOT mention AI, models, or assumptions
 * Analyze directly from the palm image
@@ -60,9 +68,11 @@ Bàn tay: ${handDirection}
 
 Định dạng:
 
-* Chỉ trả về JSON string hợp lệ có định dạng sau [{ "title": "content" }, ... ]
-* Không markdown, không giải thích ngoài JSON
-* Không bị lỗi JSON.parse
+You must respond with ONLY valid JSON.
+No markdown.
+No explanation.
+No extra text.
+Return a single JSON object.
 
 Yêu cầu:
 

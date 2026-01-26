@@ -31,7 +31,11 @@ function App(): React.JSX.Element {
   const [result, setResult] = useState<TResult[]>([])
   const [componentKey, setComponentKey] = useState(0)
 
-  const onSubmit = (picture: string, handDirection: 'Left' | 'Right'): void => {
+  const onSubmit = (
+    picture: string,
+    handDirection: 'Left' | 'Right',
+    processImageUrl: string
+  ): void => {
     setShowLoading(true)
 
     const showDemo = false
@@ -52,24 +56,29 @@ function App(): React.JSX.Element {
         setShowLoading(false)
       }, 1000)
     } else
-      window.ai
-        .analyzePalmFromCanvas(picture, handDirection)
-        .then((result) => {
-          // parse result to json
-          const parsedResult = JSON.parse(result) as TResult[]
-          setResult(parsedResult)
+      // Log time need to processing
+      console.time('llm handle')
+    window.ai
+      .analyzePalmFromCanvas(processImageUrl, handDirection)
+      .then((result) => {
+        // parse result to json
+        const parsedResult = JSON.parse(result) as TResult[]
+        setResult(parsedResult)
 
-          setPictureUrl(picture)
-          setShowResult(true)
-          setShowLoading(false)
-        })
-        .catch((err) => {
-          console.error(err)
-          setShowLoading(false)
-          alert(err.message)
+        setPictureUrl(picture)
+        setShowResult(true)
+        setShowLoading(false)
+      })
+      .catch((err) => {
+        console.error(err)
+        setShowLoading(false)
+        alert(err.message)
 
-          setComponentKey(componentKey + 1)
-        })
+        setComponentKey(componentKey + 1)
+      })
+      .finally(() => {
+        console.timeEnd('llm handle')
+      })
   }
 
   return (

@@ -11,10 +11,11 @@ import {
 } from '@renderer/AI/fns'
 import handGif from '@renderer/assets/hand/hand-guide.gif'
 import SubtractHand from '../assets/hand/Subtract.svg'
+import { mediaPipeUltis } from '@renderer/AI/mediaPipeUltis'
 
 type Props = {
   setMessage(msg: Messages): void
-  onSubmit(picture: string, handDirection: 'Left' | 'Right'): void
+  onSubmit(picture: string, handDirection: 'Left' | 'Right', processImageUrl: string): void
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -165,14 +166,16 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
 
     ctx.drawImage(video, 0, 0, width, height)
     const imageData = canvas.toDataURL('image/png')
-    setPicture(imageData)
+    mediaPipeUltis.processingImage(canvas).then((processImageUrl) => {
+      setPicture(imageData)
 
-    // wait for 1.5s for user preview picture
-    setTimeout(() => {
-      onSubmit(imageData, handDirection)
-    }, 1500)
+      // wait for 1.5s for user preview picture
+      setTimeout(() => {
+        onSubmit(imageData, handDirection, processImageUrl)
+      }, 1500)
 
-    console.log('📸 Picture taken')
+      console.log('📸 Picture taken')
+    })
   }
 
   return (

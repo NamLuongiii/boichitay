@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { motion } from 'motion/react'
 import { HandDetection, Messages } from '@renderer/AI/HandDetection'
 type Props = {
-  onSubmit(picture: string, handDirection: 'Left' | 'Right'): void
+  onSubmit(picture: string, handDirection: 'Left' | 'Right', processImageUrl: string): void
 }
 const Container = styled.div`
   position: relative;

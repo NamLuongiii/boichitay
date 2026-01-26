@@ -10,9 +10,7 @@ import {
   minAreaAllowed
 } from '@renderer/AI/fns'
 import handGif from '@renderer/assets/hand/hand-guide.gif'
-import { segmentationImage } from '@renderer/AI/OpenCV'
-import { metapipeUlties } from '@renderer/AI/metapipeUltis'
-// import SubtractHand from '../assets/hand/Subtract.svg'
+import SubtractHand from '../assets/hand/Subtract.svg'
 
 type Props = {
   setMessage(msg: Messages): void
@@ -166,26 +164,13 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
     if (!ctx) return
 
     ctx.drawImage(video, 0, 0, width, height)
-    // const imageData = canvas.toDataURL('image/png')
-    // setPicture(imageData)
-
-    metapipeUlties
-      .processingImage(canvas)
-      .then((landmarks) => {
-        const outputCanvas = document.createElement('canvas')
-        segmentationImage(landmarks, canvas, outputCanvas)
-          .then(() => {
-            const imageData = outputCanvas.toDataURL('image/png')
-            setPicture(imageData)
-          })
-          .catch(console.error)
-      })
-      .catch(console.error)
+    const imageData = canvas.toDataURL('image/png')
+    setPicture(imageData)
 
     // wait for 1.5s for user preview picture
-    // setTimeout(() => {
-    //   onSubmit(imageData, handDirection)
-    // }, 1500)
+    setTimeout(() => {
+      onSubmit(imageData, handDirection)
+    }, 1500)
 
     console.log('📸 Picture taken')
   }
@@ -198,7 +183,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           ref={videoRef}
           autoPlay
           playsInline
-          // className={'masked-video'}
+          className={'masked-video'}
           style={picture ? { display: 'none' } : {}}
         />
 
@@ -207,7 +192,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
         <HandLine src={handLine} alt="hand line" />
 
         {/*Subtract color*/}
-        {/*<HandLine src={SubtractHand} alt="subtract hand" />*/}
+        <HandLine src={SubtractHand} alt="subtract hand" />
 
         {/*display video when hand not detected */}
         {showPaw && (

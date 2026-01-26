@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import 'dotenv/config.js'
 
-const geminiKey = process.env.GEMINI_KEY || ''
-const geminiModel = process.env.GEMINI_MODEL || ''
+const geminiKey = process.env.GEMINI_KEY || 'AIzaSyDUNISI-h2EcOQe1EShfQuQQzCw4YB9wy4'
+const geminiModel = process.env.GEMINI_MODEL || 'gemini-1.5-pro'
 const genAI = new GoogleGenerativeAI(geminiKey)
 
 export async function analyzePalmFromCanvas(

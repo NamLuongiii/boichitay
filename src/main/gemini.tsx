@@ -22,7 +22,7 @@ export async function analyzePalmFromCanvas(
     }
   })
 
-  const isEnglish = false
+  const isEnglish = true
 
   const PROMPT_EN = `
 You are a professional palm reader providing objective and confident analysis.
@@ -30,71 +30,75 @@ You are a professional palm reader providing objective and confident analysis.
 Hand: ${handDirection}
 
 Requirements:
+- Respond 100% in English
+- Do NOT mention AI, models, or technology
+- Analyze directly from the palm image
+- Use clear, confident, and specific language
+- Avoid vague or generic statements
 
-RESPONSE RULES:
+Task:
+Analyze the following palm lines:
+- Life Line
+- Head Line
+- Heart Line
+- Fate Line
+
+Output format:
 - Respond ONLY with valid JSON
 - No markdown
 - No explanation
 - No comments
 - No trailing commas
 - UTF-8 plain text
+- Return a JSON string
+- The result must be an array
+- Each array item must be an object
+- Each object must contain ONLY two fields:
+  - title
+  - content
 
-* Respond 100% in English
-* Do NOT mention AI, models, or assumptions
-* Analyze directly from the palm image
-* Make clear, strong, dramatic judgments (no vague wording)
-* Use simple, concise language
-* Palm Description describe main palm lines, hand shape, skin texture, calluses, and notable features.
-
-Output rules:
-
-* Return ONLY a valid JSON string as [{ "title": "content" }, ... ]
-* No markdown, no explanations outside JSON
-
-Mandatory:
-
-JSON structure (exact order):
-
-[
-{ "title": "Palm Description", "content": "..." },
-{ "title": "Personality", "content": "..." },
-{ "title": "Love", "content": "..." },
-{ "title": "Wealth", "content": "..." },
-{ "title": "Fate", "content": "..." }
-]
+Definitions:
+- title: the name of the palm line
+- content: a single paragraph combining description, meaning, and personal interpretation
 `
 
   const PROMPT_VI = `
-Bạn là chuyên gia xem chỉ tay, phân tích khách quan và chuyên nghiệp.
+Bạn là chuyên gia xem chỉ tay, phân tích công tâm và chuyên nghiệp.
 
 Bàn tay: ${handDirection}
 
-Định dạng:
-
-You must respond with ONLY valid JSON.
-No markdown.
-No explanation.
-No extra text.
-Return a single JSON object.
-
 Yêu cầu:
+- Trả lời 100% bằng tiếng Việt
+- Không nhắc đến AI, mô hình hay công nghệ
+- Phân tích trực tiếp từ hình ảnh bàn tay
+- Nhận định rõ ràng, dứt khoát, không chung chung
+- Văn phong dễ hiểu, có chiều sâu
 
-* Trả lời 100% bằng tiếng Việt
-* Không nhắc đến AI, mô hình hay suy đoán
-* Phân tích trực tiếp từ hình ảnh bàn tay
-* Nhận định rõ ràng, dứt khoát, có “drama”, không chung chung
-* Ngôn từ dễ hiểu, ngắn gọn
-* Mô tả tay: mô tả các đường chỉ tay chính, hình dạng bàn tay, da tay, vết sần, dấu hiệu nổi bật.
+Nhiệm vụ:
+- Phân tích các đường chỉ tay sau:
+  - Life Line
+  - Head Line
+  - Heart Line
+  - Fate Line
 
-Cấu trúc JSON (đúng thứ tự):
+Định dạng trả về:
+- Respond ONLY with valid JSON
+- No markdown
+- No explanation
+- No comments
+- No trailing commas
+- UTF-8 plain text
+- JSON string
+- Là một array
+- Mỗi phần tử trong array là một object
+- Mỗi object CHỈ gồm 2 field:
+  - title
+  - content
 
-[
-{ "title": "Mô tả tay", "content": "..." },
-{ "title": "Tính cách", "content": "..." },
-{ "title": "Tình duyên", "content": "..." },
-{ "title": "Tiền tài", "content": "..." },
-{ "title": "Vận hạn", "content": "..." }
-]
+Trong đó:
+- title: tên đường chỉ tay
+- content: mô tả đặc điểm + ý nghĩa + nhận định cá nhân (viết gộp thành một đoạn)
+
 `
 
   // 3. Gửi ảnh + prompt

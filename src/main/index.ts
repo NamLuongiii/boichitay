@@ -7,15 +7,15 @@ import { analyzePalmFromCanvas, listGeminiModels } from './gemini'
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 800,
     show: false,
-    // autoHideMenuBar: true,
+    autoHideMenuBar: true,
+    fullscreen: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
-    }
+    },
+    title: '手相占いアプリ'
   })
 
   mainWindow.on('ready-to-show', () => {

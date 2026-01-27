@@ -65,19 +65,21 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
       })
 
       const video = videoRef.current
-      if (video) {
-        video.srcObject = stream
-        await video.play()
-
-        video.requestVideoFrameCallback(() => {
-          if (video.videoWidth > 0 && video.videoHeight > 0) {
-            predictGesture().then()
-            return
-          } else {
-            setTimeout(() => video.requestVideoFrameCallback(predictGesture), 1000)
-          }
-        })
+      if (!video) {
+        throw new Error('No video element')
       }
+
+      video.srcObject = stream
+      await video.play()
+
+      video.requestVideoFrameCallback(() => {
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+          predictGesture().then()
+          return
+        } else {
+          setTimeout(() => video.requestVideoFrameCallback(predictGesture), 1000)
+        }
+      })
     }
 
     async function predictGesture(): Promise<void> {
@@ -140,7 +142,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
       requestRef.current = requestAnimationFrame(predictGesture)
     }
 
-    setupGestureRecognizer().then(startCamera).catch(console.error)
+    setupGestureRecognizer().then(startCamera).catch(alert)
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current)

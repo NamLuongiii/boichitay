@@ -36,12 +36,7 @@ Requirements:
 - Use clear, confident, and specific language
 - Avoid vague or generic statements
 
-Task:
-Analyze the following palm lines:
-- Life Line
-- Head Line
-- Heart Line
-- Fate Line
+Task: Find palm lines on my picture and analyze the following palm lines
 
 Output format:
 - Respond ONLY with valid JSON
@@ -74,12 +69,7 @@ Yêu cầu:
 - Nhận định rõ ràng, dứt khoát, không chung chung
 - Văn phong dễ hiểu, có chiều sâu
 
-Nhiệm vụ:
-- Phân tích các đường chỉ tay sau:
-  - Life Line
-  - Head Line
-  - Heart Line
-  - Fate Line
+Nhiệm vụ: tìm các đương chỉ tay trên ảnh tôi gửi và phân tích ý nghĩa của những đường chỉ tay đó
 
 Định dạng trả về:
 - Respond ONLY with valid JSON

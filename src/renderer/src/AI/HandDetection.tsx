@@ -10,7 +10,7 @@ import {
   minAreaAllowed
 } from '@renderer/AI/fns'
 import handGif from '@renderer/assets/hand/hand-guide.gif'
-import SubtractHand from '../assets/hand/Subtract.svg'
+// import SubtractHand from '../assets/hand/Subtract.svg'
 import { mediaPipeUltis } from '@renderer/AI/mediaPipeUltis'
 
 type Props = {
@@ -197,7 +197,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
         <HandLine src={handLine} alt="hand line" />
 
         {/*Subtract color*/}
-        <HandLine src={SubtractHand} alt="subtract hand" />
+        {/*<HandLine src={SubtractHand} alt="subtract hand" />*/}
 
         {/*display video when hand not detected */}
         {showPaw && (

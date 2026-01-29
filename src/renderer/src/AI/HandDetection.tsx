@@ -16,6 +16,7 @@ import { mediaPipeUltis } from '@renderer/AI/mediaPipeUltis'
 type Props = {
   setMessage(msg: Messages): void
   onSubmit(picture: string, handDirection: 'Left' | 'Right', processImageUrl: string): void
+  reset(): void
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -34,7 +35,7 @@ enum GESTURES {
   OPEN_PALM = 'Open_Palm'
 }
 
-export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
+export const HandDetection = ({ setMessage, onSubmit, reset }: Props): JSX.Element => {
   const landmarkerRef = useRef<HandLandmarker | null>(null)
   const gestureRef = useRef<GestureRecognizer>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -104,7 +105,7 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
           const isParallel = isPalmParallelToCamera(landmarks)
           const isFacing = isPalmFacingCamera(handDirection, landmarks)
           const isCentered = isHandCentered(landmarks)
-          const { isInRange } = minAreaAllowed(landmarks, 0.4)
+          const { isInRange } = minAreaAllowed(landmarks, 0.35)
 
           if (isOpen && isFacing && isParallel && isCentered && isInRange) {
             // Hand in the correct position
@@ -168,16 +169,23 @@ export const HandDetection = ({ setMessage, onSubmit }: Props): JSX.Element => {
 
     ctx.drawImage(video, 0, 0, width, height)
     const imageData = canvas.toDataURL('image/png')
-    mediaPipeUltis.processingImage(canvas).then((processImageUrl) => {
-      setPicture(imageData)
+    mediaPipeUltis
+      .processingImage(canvas)
+      .then((processImageUrl) => {
+        setPicture(imageData)
 
-      // wait for 1.5s for user preview picture
-      setTimeout(() => {
-        onSubmit(imageData, handDirection, processImageUrl)
-      }, 1500)
+        // wait for 1.5s for user preview picture
+        setTimeout(() => {
+          onSubmit(imageData, handDirection, processImageUrl)
+        }, 1500)
 
-      console.log('📸 Picture taken')
-    })
+        console.log('📸 Picture taken')
+      })
+      .catch((e) => {
+        alert(e)
+        // reset
+        reset()
+      })
   }
 
   return (

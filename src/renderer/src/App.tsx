@@ -86,7 +86,11 @@ function App(): React.JSX.Element {
       {showResult && pictureUrl ? (
         <Result tryAgain={() => setShowResult(false)} pictureUrl={pictureUrl} result={result} />
       ) : (
-        <HandDetect key={componentKey} onSubmit={onSubmit} />
+        <HandDetect
+          key={componentKey}
+          onSubmit={onSubmit}
+          reset={() => setComponentKey(componentKey + 1)}
+        />
       )}
 
       {/*<Stars />*/}

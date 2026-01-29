@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import { HandDetection, Messages } from '@renderer/AI/HandDetection'
 type Props = {
   onSubmit(picture: string, handDirection: 'Left' | 'Right', processImageUrl: string): void
+  reset(): void
 }
 const Container = styled.div`
   position: relative;
@@ -28,7 +29,7 @@ const Logo = styled.img`
   left: 1rem;
 `
 
-export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
+export const HandDetect = ({ onSubmit, reset }: Props): React.JSX.Element => {
   const [message, setMessage] = useState(Messages.NO_HAND_DETECTED)
 
   return (
@@ -36,7 +37,7 @@ export const HandDetect = ({ onSubmit }: Props): React.JSX.Element => {
       {/*Logo */}
       <Logo src={logo} alt="logo" />
 
-      <HandDetection setMessage={setMessage} onSubmit={onSubmit} />
+      <HandDetection setMessage={setMessage} onSubmit={onSubmit} reset={reset} />
 
       <Bottom>
         {message === Messages.KEEP_HAND_STILL ? (
@@ -89,6 +90,7 @@ const MessageCountdown = (): JSX.Element => {
     }, 1000)
     return () => clearInterval(timer)
   }, [seconds])
+
   return (
     <BtnMotion
       initial={{ scale: 0.8 }}

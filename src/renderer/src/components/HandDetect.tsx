@@ -83,7 +83,7 @@ const MessageCountdown = (): JSX.Element => {
     const timer = setInterval(() => {
       if (seconds === 1) {
         clearInterval(timer)
-        setMsg('Take a picture')
+        setMsg('撮影する')
         return
       }
       setSeconds(seconds - 1)
@@ -104,7 +104,7 @@ const MessageCountdown = (): JSX.Element => {
       type="button"
       style={{ backgroundColor: 'var(--green-color)', boxShadow: 'none' }}
     >
-      {msg ? msg : `Hold the position for ${seconds} seconds`}
+      {msg ? msg : `そのまま${seconds}秒間キープしてください。`}
     </BtnMotion>
   )
 }

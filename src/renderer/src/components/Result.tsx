@@ -14,7 +14,7 @@ export const Result = ({ tryAgain, pictureUrl, result }: Props): React.JSX.Eleme
   return (
     <Container>
       <img src={logo} alt="logo" />
-      <h1 style={{ width: '100%' }}>Assessment results</h1>
+      <h1 style={{ width: '100%' }}>鑑定結果</h1>
 
       <Content>
         <Answers
@@ -56,7 +56,7 @@ export const Result = ({ tryAgain, pictureUrl, result }: Props): React.JSX.Eleme
         />
       </Content>
       <button type="button" onClick={tryAgain}>
-        try again
+        もう一度試す
       </button>
     </Container>
   )

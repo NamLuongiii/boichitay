@@ -8,8 +8,8 @@ export const Loading = (): JSX.Element => {
     <FlexContainer>
       <video src={loadingVideo} playsInline autoPlay muted loop></video>
       <div>
-        <p>We are analyzing your hand,</p>
-        <p>please wait a moment...</p>
+        <p>手相を解析しています。</p>
+        <p>しばらくお待ちください。。。</p>
       </div>
     </FlexContainer>,
     document.getElementById('root') as HTMLElement

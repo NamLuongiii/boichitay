@@ -22,39 +22,68 @@ export async function analyzePalmFromCanvas(
     }
   })
 
-  const isEnglish = true
+  const isJP = true
 
-  const PROMPT_EN = `
-You are a professional palm reader providing objective and confident analysis.
+  const PROMPT_JP = `
+あなたは客観的かつ自信を持って鑑定するプロの手相鑑定士です。
 
-Hand: ${handDirection}
+手の向き: ${handDirection}
 
-Requirements:
-- Respond 100% in English
-- Do NOT mention AI, models, or technology
-- Analyze directly from the palm image
-- Use clear, confident, and specific language
-- Avoid vague or generic statements
+要件:
 
-Task: Find palm lines on my picture and analyze the following palm lines
+回答は 100% 日本語
 
-Output format:
-- Respond ONLY with valid JSON
-- No markdown
-- No explanation
-- No comments
-- No trailing commas
-- UTF-8 plain text
-- Return a JSON string
-- The result must be an array
-- Each array item must be an object
-- Each object must contain ONLY two fields:
-  - title
-  - content
+AI・モデル・技術について 一切言及しない
 
-Definitions:
-- title: the name of the palm line
-- content: a single paragraph combining description, meaning, and personal interpretation
+手のひらの画像のみから直接分析する
+
+明確で断定的、具体的な表現を使う
+
+曖昧・一般論的な表現は避ける
+
+タスク:
+
+画像から手相の線を見つけ、以下の手相線を分析してください
+
+出力形式:
+
+有効な JSON のみで返す
+
+マークダウン禁止
+
+説明文・注釈・コメント禁止
+
+末尾カンマ禁止
+
+UTF-8 プレーンテキスト
+
+JSON文字列を返す
+
+結果は 配列
+
+配列の各要素は オブジェクト
+
+各オブジェクトは 以下2フィールドのみを含む
+
+title
+
+content
+
+定義:
+
+title: 手相線の名称
+
+content: 形状の説明・意味・個人的な解釈を 1段落にまとめた文章
+
+もし
+
+もっとドラマ性を強めたい
+
+断言口調をさらに強くしたい
+
+占いサービス向けに調整したい
+
+とかあれば、用途に合わせて日本語をチューニングするよ
 `
 
   const PROMPT_VI = `
@@ -100,7 +129,7 @@ Trong đó:
       }
     },
     {
-      text: isEnglish ? PROMPT_EN : PROMPT_VI
+      text: isJP ? PROMPT_JP : PROMPT_VI
     }
   ])
 

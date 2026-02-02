@@ -21,14 +21,14 @@ type Props = {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export enum Messages {
-  NO_HAND_DETECTED = 'Hand not detected. Please face your palm toward the camera.',
-  HAND_NEED_PARALLEL = 'Hand needs to be parallel to camera.',
-  HAND_NEED_FACING = 'Hand needs to be facing camera.',
-  HAND_NEED_CLOSER = 'Hand needs to be closer to camera.',
-  KEEP_HAND_STILL = 'Hold the position for 3 seconds',
-  HAND_NEED_OPEN_PALM = 'Hand needs to be open.',
-  HAND_NEED_CENTER = 'Hand needs to be in the center of the camera.',
-  HAND_NEED_IN_VIEW = 'Hand needs to be in the view of the camera.'
+  NO_HAND_DETECTED = '手が検出されません。手のひらをカメラに向けてください。',
+  HAND_NEED_PARALLEL = '手はカメラと平行である必要があります。',
+  HAND_NEED_FACING = '手のひらをカメラに向けてください。',
+  HAND_NEED_CLOSER = '手をもう少しカメラに近づけてください。',
+  KEEP_HAND_STILL = 'そのまま3秒間キープしてください。',
+  HAND_NEED_OPEN_PALM = '手を開いてください。',
+  HAND_NEED_CENTER = '手をカメラの中央に合わせてください。',
+  HAND_NEED_IN_VIEW = '手はカメラの視野内に入っている必要があります。'
 }
 
 enum GESTURES {
